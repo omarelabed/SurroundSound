@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Tuple;
 
+import models.AppData;
 import models.AppLogger;
 import models.SurroundSoundFbEvent;
 import models.SurroundSoundFbPage;
@@ -56,14 +57,15 @@ public class SurroundSoundController extends Controller {
 
 	public static final long REFRESH_RATE = 18000000; //18000000;// 3 minutes  // (In milliseconds)
 	public static String appName = "SurroundSound";
-	public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
+	public static String wsAddress = "ws://pdnet.inf.unisi.ch/SurroundSound/socket";
+//	public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
 	//display size: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
 	public static HashMap<String, Sockets> displaySockets = new HashMap<String, Sockets>();
 	public static HashMap<WebSocket.Out<JsonNode>, String> displaySocketReverter = new HashMap<WebSocket.Out<JsonNode>, String>();
 
 	
-	public static FacebookClient FB_CLIENT = new DefaultFacebookClient(accessToken);
+	public static FacebookClient FB_CLIENT;
 
 	private static String[] pageNamesArr = {
 		"52722248335",
@@ -393,6 +395,13 @@ public class SurroundSoundController extends Controller {
 	}
 
 	public static void init() {
+		try {
+			String at = AppData.get(new Long(1)).accessToken;
+			FB_CLIENT= new DefaultFacebookClient(at);
+		} catch (Exception e) {
+			Logger.error("Can't initialize a DefaultFacebookClient",e);
+			Logger.warn("Please check the presence of the access token in the DB");
+		}
 		startEventsScheduler();
 	}
 }
