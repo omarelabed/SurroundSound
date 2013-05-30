@@ -1,0 +1,509 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainFullscreen.css")">
+		}
+	
+	
+<!--
+    <ul id="eventlist"></ul>
+-->
+        
+    
+    
+    <!-- <table id="agenda" style='display:none;'>
+        <tr id="row0_agenda"></tr>
+        <tr id="row1_agenda"></tr>
+    </table> -->
+    
+        <center><header><img height="33px" src="@routes.Assets.at("images/logo.png")" alt"SurroundSound">SurroundSound<img height="33px" src="@routes.Assets.at("images/logo0.png")" alt"SurroundSound"></header></center>
+
+        <center id="loader"><img style="{padding: 50px}" src="@routes.Assets.at("images/preloader.gif")" alt"Loading..."></center>
+        
+        <div class="content">
+    <div id='agenda' style='display:none;'>
+        <table id='agenda_table'>
+            <tr>
+                <td class='bigbox leftlined' valign='top' id="past_view" style='display:none;'>
+                    <!-- <table class="timegrid" id="past" style='display:none;'> -->
+                    <table class="timegrid" id="past">
+                        <tr><td id="past_header"><h1 class='mirror' id='home'>PAST</h1></td></tr>
+                        <tr class='row0' id="row0_past"></tr>
+                        <tr class='row1' id="row1_past"></tr>
+                    </table>
+                </td>
+                <td class='bigbox leftlined' id="today_view" valign='top' style='display:none;'>
+                    <!-- <table class="timegrid" id="today" style='display:none;'> -->
+                    <table class="timegrid" id="today">
+                        <tr><td id="today_header"><h1>TODAY</h1></td></tr>
+                        <tr class='row0' id="row0_today"></tr>
+                        <tr class='row1' id="row1_today"></tr>
+                    </table>
+                </td>
+                <td class='bigbox leftlined' id="soon_view" valign='top' style='display:none;'>
+                    <!-- <table class="timegrid" id="soon" style='display:none;'> -->
+                    <table class="timegrid" id="soon">
+                        <tr><td id="soon_header"><h1>SOON</h1></td></tr>
+                        <tr class='row0' id="row0_soon"></tr>
+                        <tr class='row1' id="row1_soon"></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+    
+    
+    <!-- <div id='hidden' style='display:none;'></div> -->
+    <!-- <div id='hidden' style=''></div> -->
+<!--
+    <ul id="row0"></ul>
+    <ul id="row1"></ul>
+-->
+    
+    <!-- <div id="scrollingDiv"> -->
+        <!-- <h1 id="logotitle"> -->
+            <!-- <img id="logo" src="@routes.Assets.at("images/homeButton.png")" alt="SurroundSound" height="33px"> -->
+            <!-- SurroundSound</h1> -->
+    <!-- </div> -->
+    
+    <center>
+        <div id='scrollbar'></div>
+    </center>
+    
+    <ul id='monitor'></ul>
+    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="@routes.Assets.at("javascripts/jquery.mCustomScrollbar.concat.min.js")"></script>
+
+    <script type="text/javascript">
+    
+    
+    // WEBSOCKET
+    var WS = WebSocket;
+    var wsUri = "@wsAddress";
+    websocket = new WS(wsUri);    
+    console.log("display id: "+@displayId+" ,size: "+"@size");
+    // just telling the server that I'm ready... :)
+    websocket.onopen = function(evt) {
+        console.log("CONNECTED");
+        var hi = JSON.stringify
+        ({
+            "kind":"appReady",
+            "displayID": @displayId,
+            "size": "@size"
+        });
+        websocket.send(hi);
+        monitor('sent hi', '');
+        $("#agenda").hide();
+        $("#loader").show();
+    }
+    // bye, bye! :D
+    websocket.onclose = function(evt) { 
+        console.log("DISCONNECTED");
+        var bye = JSON.stringify
+        ({
+            "kind":"appClose",
+            "displayID": @displayId,
+            "size": "@size"
+        });
+        websocket.send(bye);
+        monitor("closed connection with server", '');
+    }
+    // Catch the error! B-)
+	websocket.onerror = function(evt) {
+		console.log(evt.data);
+        monitor('ERROR!\t'+evt.data);
+	};
+    
+    // receiving and handling data from the server
+    websocket.onmessage = function(evt) {
+        console.log("GOT MESSAGE FROM SERVER");
+        var now = new Date().getTime();
+        // convert to json
+        var response = $.parseJSON(evt.data);
+        console.log(response);
+        var alt="Discover events with SurroundSound!";
+        monitor("response.kind = ", response.kind);
+        
+        if(response.kind == 'update') {
+            monitor('udpate!','');
+            
+        }
+        
+        // handle all the events JSONs
+        if(response.kind == "events") {
+            // monitor('response.kind == "events"');
+            var pastEvents = response.past;
+            addEvents(pastEvents,'past');
+            var todaysEvents = response.today;
+            addEvents(todaysEvents,'today');
+            // var tomorrowsEvents = response.tomorrow;
+            // addEvents(tomorrowsEvents,'tomorrow');
+            var soonEvents = response.soon;
+            addEvents(soonEvents,'soon');
+            setUpPage();
+        }
+    }
+    
+    // data collection and sending
+    function sendData(d){
+        console.log('Sending following data to server:');
+        console.log(d);
+        websocket.send(JSON.stringify(d));
+    }
+    
+    function sendSimpleInteractionData(type,eventId){
+        sendData(makeSimpleInteractionData(type,eventId));
+    }
+    
+    function makeSimpleInteractionData(type,eventId) {
+        var timestamp = new Date();
+        var d = {
+            "kind":'interaction',
+            "displayID": @displayId,
+            // "size": "@size",
+            'eventId':eventId,
+            'type':type,
+            'timestamp':timestamp
+        };
+        return d;
+    }
+
+    function setTimer(e){
+        monitor("setTimer(): e.(X,Y): "+e.pageX+", "+e.pageY,'');
+    }
+    
+
+    var countDownTime = 5; // default: 20
+    var timer = 0;
+    var isHome = true;
+    function react(){
+        $('html, #agenda').stop();
+        isHome = false;
+        resetTimer();
+        // monitor("resetTimer() ", timer);
+    }
+    function resetTimer(){
+        timer=0;
+    }
+    $(document).bind("click keydown keyup", react);
+    $(document).ready(function () {
+        var inactiveTime = setInterval(function() {
+            timer = timer + 1;
+            // monitor('countdown: ',countDownTime-timer);
+            if (timer > countDownTime) {
+                if (!isHome) {
+                    goHome();
+                    isHome=true;
+                };
+                resetTimer();
+            }
+        }, 1000); // 1 minute
+    })
+    
+    function monitor(key, val){
+        var d = new Date();
+        console.log('['+d.toTimeString()+'] : '+key+' '+val);
+        // $('#monitor').prepend($('<li></li>').html('['+d.toTimeString()+'] : '+key).append(val));
+    }
+    
+    // row keeps track of where to put the next event in the tables (can be either zero or one)
+    // usually alternating within the same table
+    var row = 0;
+    var alt="Discover events with SurroundSound!";
+    
+    // addToAgenda: JSON_event htmlElement_id => void
+    // adds an event e to the agenda at the given html id
+    // IMPORTANT the row var has to be initialized outside of this method (see above)
+    function addToAgenda(e, id){
+        monitor('addToAgenda('+e+', '+id+')', e.name);
+        var box = $('<div class="event_box"></div>').attr({
+            // 'class':'event_box',
+            'id':e.id
+        });
+        var td = $('<td></td>').attr({
+            'valign':'top',
+            'id':'box_'+e.id
+        });
+        // cover
+        var coverspan = $('<span></span>');
+        box.html(coverspan);
+        var coverdiv = $('<div class="coverImage" style="position:relative">');
+        coverspan.html(coverdiv);
+        var coverimg = $('<img></img>').attr({
+            "alt":"Discover events with SurroundSound!",
+            "src":e.coverSource
+        });
+        coverdiv.html(coverimg);
+        var more = $('<img></img>').attr({
+            'class':'more',
+            'src': "@routes.Assets.at("images/plus.gif")",
+            'alt': '+',
+            'height': "20px"
+        });
+        // info
+        var infodiv = $('<div class="info"></div>');
+        var whendiv = $('<div class="when"></div>').text(e.day+', '+e.date+', '+e.time);
+        var wherediv = $('<div class="where"></div>').text(e.place);
+        var nameString = e.name;
+        if (nameString.length>60){
+            nameString=nameString.substr(0,56)+'...';
+        }
+        var namediv = $('<h1 class="eventName"></h1>').text(nameString);//(e.name);
+        // monitor('more = ', more);
+        // // infodiv.append(whendiv, wherediv, namediv, more);
+        infodiv.append(whendiv, wherediv, namediv);
+        // alert(infodiv.html());
+        box.append(infodiv);
+        td.html(box);
+        // alert(td.html());
+        $('#row'+row+'_'+id).append(td);
+        // alert($('#row'+row+'_'+id).html());
+        // var s = 'row: '+row+' -> ';
+        row = (row+1)%2;
+        // alert(s+row);
+    }
+
+    // addToDetails: event htmlElement_id => void
+    // adds an event e to a specific target
+    function addToDetails(e, target){
+        
+        monitor('addToDetails('+e.id+', '+target+') -- ', e.name);
+        var detailsdiv = $('<div></div>').attr({
+            'class':'eventDetails',
+            'id':'details_'+e.id
+        });
+        var detailsImage = $('<img/>').attr({
+            'src':e.coverSource,
+            'alt':alt
+        });
+        monitor('\te.id = ',e.id);
+        monitor('\te.name = ',e.name);
+        monitor('\te.place = ',e.place);
+        monitor('\te.description = ',e.description);
+        monitor('\te.startTime = ',e.startTime);
+        monitor('\te.endTime = ',e.endTime);
+        monitor('\te.location = ',e.location);
+        monitor('\te.venue = ',e.venue);
+        monitor('\te.coverSource = ',e.coverSource);
+        monitor('\te.attendance = ',e.attendance);
+        monitor('\te.karma = ',e.karma);
+        monitor('\te.date = ',e.date);
+        monitor('\te.time = ',e.time);
+        monitor('\te.day = ',e.day);
+        
+        // var when = target.toUppercase();
+        // var placelink = 'https://maps.google.ch/maps?q='+e.place.split(' ').join('+');
+        // var place = e.place.split(' ').join('+');
+        // var locURL = 'https://maps.google.ch/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q='+place+'&amp;hnear='+place+'&amp;z=14&amp;output=embed';
+        // var maplink = $('<a></a>').text('Map').attr('href',placelink);
+        // var map0 = $('<iframe></iframe>').attr({
+        //     'width' : "425",
+        //     'height' : "350",
+        //     'frameborder' : "0",
+        //     'scrolling' : "no",
+        //     'marginheight' : "0",
+        //     'marginwidth' : "0",
+        //     'src' : locURL //placelink//+";output=embed"
+        // });//.append($('<br />'));
+        // var map = $('<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src='+locURL+'></iframe>');
+        // '<iframe       ></iframe><br />
+        // // var externalmap = '<small><a href="'+'https://maps.google.ch/maps?q='+e.place+';source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>'
+        var detailsTable = $('<table></table>');
+        var det0_img = $('<td></td>').html(detailsImage);
+        // var description = $('<td></td>');
+        // if (e.description!=null){
+        //     description.html($('<h3 width="20%"></h3>').text(e.description));
+        // }
+        // var infodiv = $()
+        // var det1_info = $('<td></td>').html(infodiv.clone());
+        // var det2_map = $('<td></td>').html(map);
+        // var volup = $('<img/>').attr({
+        //     'class': 'volup',
+        //     'src': "@routes.Assets.at("images/volup.png")",
+        //     'alt': ':)',
+        //     'height': "20px"
+        // });
+        // // monitor('volup = ', volup);
+        // var voldown = $('<img/>').attr({
+        //     'class': 'voldown',
+        //     'src': "@routes.Assets.at("images/voldown.png")",
+        //     'alt': ':(',
+        //     'height': "20px"
+        // });
+        // // monitor('voldown = ', voldown);
+        // var feedback = $('<div class="feedback"></div>').append(volup,voldown);
+        // // monitor('feedback = ', feedback);
+        // var detrow = $('<tr></tr>').append(det0_img,det1_info,description,det2_map);
+        var detrow = $('<tr></tr>').append(det0_img);
+        // // detrow.append();
+        detailsTable.append(detrow);
+        detailsdiv.append(detailsTable);
+        $('#hidden').append(detailsdiv);
+    }
+    
+    var eventsCollection = {};
+
+    // addEvents: JSON_event_list htmlElement_id date => void
+    // adds a list of events to a table of a given target
+    function addEvents(events, target) {
+        monitor('addEvents: target = ', target);
+        var first = -1;
+        var newCol = true;
+        var cols = 0;
+        row = 0;
+        for (var i=0; i<events.length; i++){
+            if (newCol) {
+                cols=cols+1;
+                newCol=false;
+            } else newCol=true;
+            var e = events[i];
+            var key = "event_"+e.id;
+            eventsCollection[key] = e;
+            // td entry
+            addToAgenda(e, target);
+            $('#'+target+'_view').show();
+        }
+        if (cols>0){
+            $('#'+target+'_header').attr('colspan',cols+'');
+        }
+        $('#loader').hide();
+        $('#agenda').show();
+    }
+    
+    
+    function goTo(offset){
+        var w = $('#agenda_table').width();
+        monitor('agenda_table width: ', w);
+        var t = w;
+        monitor('t = ', t);
+        $('html, #agenda').animate({
+            scrollLeft: offset+'px'
+        }, t);
+    }
+    
+    function goHome(){
+        console.log('START goHome(): $(window).scrollLeft(): '+$('#agenda').scrollLeft());
+        var shift = 82;
+        var offset = shift;
+        if ($('#past').is(':visible')) {
+            offset=offset=$('#past').width()-shift;
+            goTo(offset);
+            return;
+        };
+        if ($('#today').is(':visible')) {
+            offset=$('#today').offset().left-shift;
+            goTo(offset);
+            return;
+        };
+        if ($('#soon').is(':visible')) {
+            offset=offset=$('#soon').offset().left-shift;
+            goTo(offset);
+            return;
+        };
+        console.log('END goHome(): $(window).scrollLeft(): '+$('#agenda').scrollLeft());
+    }
+
+
+    // $('#logo').live('click', function () {
+    //     // alert('just clicked on the logo! will you scroll to '+'#'+nextEvent+'??');
+    //     
+    //     var offset = $('#'+nextEvent).offset();
+    //     $('html, body').animate({
+    //         scrollLeft: offset.left
+    //     });
+    // })
+    // 
+    // $('#loader').live('click', function() {
+    //     alert('click??');
+    //     $('#loader').hide();
+    // })
+    // 
+    // $().ready(function() {
+    //     var $scrollingDiv = $("#scrollingDiv");
+    // 
+    //     $(window).scroll(function(){
+    //         $scrollingDiv.stop().animate({
+    //             "marginLeft": ($(window).scrollLeft() + ($(window).width()/2)) + "px"
+    //         }, "fast" );
+    //     });
+    // });
+    
+    function createLightbox(){
+        var lightbox = $('<div></div>').attr('id', 'lightbox');
+        var close = $('<img/>').attr({
+            'id':'close',
+            'src':"@routes.Assets.at("images/close.jpg")",
+            'alt':'close'
+        }).css({
+            'margin-top':$('header').height()+'px'
+        });
+        lightbox.html(close);
+        var lbContent = $('<div></div>').attr('id', 'lightbox_content');
+        lightbox.append(lbContent);
+        $('body').append(lightbox);
+        close.bind('click', function(){
+            lightbox.hide('slow');
+        })
+    }
+    
+    var lastLightbox;
+    function showLightbox() {
+        $('#lightbox').show('slow');
+    }
+    
+    function makeDetails(e) {
+        console.log('TODO: define a function that creates lightbox content for');
+        console.log(e);
+        var div = $('<div></div>');
+        var title = $('<h1></h1>').text(e.name);
+        div.html(title);
+        var temp = $('#'+e.id).clone();
+        return temp;
+    }
+    
+    // shows the details of event with the given id
+    function showDetails(id){
+        sendSimpleInteractionData('showDetails',id);
+        console.log(eventsCollection['event_'+id]);
+        if ($('#lightbox').length <= 0) { // #lightbox exists
+            createLightbox();
+        }
+        if (lastLightbox!=id){
+            var e = eventsCollection['event_'+id];
+            var details = makeDetails(e);
+            console.log(details);
+            $('#lightbox_content').html(details);
+        }
+        showLightbox();
+    }
+    
+    function setUpPage(){
+        var x = $('#agenda_table').width();
+        // monitor('x = ',x);
+        $('.event_box').bind("click", function(e){
+            // console.log(e);
+            var id = $(this).attr('id');
+            monitor('showDetails request for',id);
+            
+            showDetails(id);
+        });
+        $('html, #agenda').scrollLeft(x);
+        goHome();
+        console.log(eventsCollection);
+    }
+    
+    
+
+    </script>
+    
+}

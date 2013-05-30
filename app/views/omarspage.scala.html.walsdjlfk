@@ -1,0 +1,8 @@
+@(fbps: FbPages)
+
+@main("Welcome to Omar's Page!") {
+	@for(i <- 0 to fbps.getPages().length-1) {
+		<li><a href=@fbps.getPage(i).getLink()>@fbps.getPage(i).getName()</a></li>
+		<p>More information about @fbps.getPage(i).getName() will be added soon ;)</p>
+        }
+}

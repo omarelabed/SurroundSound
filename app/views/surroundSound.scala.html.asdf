@@ -1,0 +1,114 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainFullscreen.css")">
+		}
+	
+	<div id="helloWorldBox"><ul id="eventslist"></ul></div>
+	
+	<script type="text/javascript">
+	
+	//TODO add some javaScript/JQuery logic here and/or control the logic through webSocket messages from the server
+	
+	function sendMessageToServer() {
+		var hi = JSON.stringify({
+			"kind":"eventslistRequest",
+			"displayID": @displayId,
+			"size": "@size",
+			"location": "USI"
+		});
+		websocket.send(hi);
+	}
+		
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+	
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+	websocket = new WS(wsUri); 
+	
+	console.log("display id: "+@displayId+" ,size: "+"@size");
+	
+	websocket.onopen = function(evt) { 
+		console.log("CONNECTED");
+//		alert("CONNECTED");
+		var hi = JSON.stringify
+		({
+            "kind":"appReady",
+            // "kind":"eventslistRequest",
+            // "kind":"pagelist",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(hi);
+	}; //websocket.onopen
+
+	websocket.onclose = function(evt) { 
+		console.log("DISCONNECTED");
+		var bye = JSON.stringify
+		({
+			"kind":"appClose",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(bye);
+	}; //websocket.onclose
+
+	websocket.onmessage = function(evt) {
+		alert("got message!");
+        
+		var response = jQuery.parseJSON(evt.data);
+		
+		if(response.kind == "request"){
+			//TODO - do something here when a message from the app server arrives
+		}//if
+		
+		if(response.kind == "pagelist"){
+			alert("pagelist!");
+			//TODO - do something here when a message from the app server arrives
+		}//if
+
+		//Hello World message sent from the app server
+		if(response.kind == "hello"){
+			$('#eventslist').append(response.text);
+		}
+		
+		// SurroundSound eventList message sent from the app server
+		if(response.kind == "appReadyResponse0"){
+			var events = response.events;
+			var s = '';
+			for (var i = 0; i < events.length; i++) {
+				s+='<li>'+events[i]+'</li>';
+			}
+			$('#eventslist').append(s);
+		}
+		
+		if(response.kind == "eventslistResponse") {
+			var list = response.events.actualList;
+			s='';
+			for (var i=0; i<list.length; i++){
+				s+='<li>'+list[i].id+' == '+list[i].startTime+': '+list[i].name+'</li>';
+			}
+			$('#eventslist').append(s);
+		}
+		
+			
+	}; //websocket.onmessage
+
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+	
+	//---- WS
+	
+	</script>	
+
+}

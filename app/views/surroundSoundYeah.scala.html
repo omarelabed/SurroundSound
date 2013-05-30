@@ -1,0 +1,224 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainFullscreen.css")">
+		}
+	
+	
+<!--
+    <ul id="eventlist"></ul>
+-->
+    <table id="agenda">
+        <tr id="row0"></tr>
+        <tr id="row1"></tr>
+    </table>
+    
+    <h1 id="logotitle"><img id="logo" src="@routes.Assets.at("images/logoSS.png")" alt="SurroundSound" height="25px">SurroundSound</h1>
+
+    <script type="text/javascript">
+
+    //     var WS = WebSocket;
+    //     var wsUri = "@wsAddress";
+    //     websocket = new WS(wsUri); 
+    //     
+    //     console.log("display id: "+@displayId+" ,size: "+"@size");
+    //     
+    //     websocket.onopen = function(evt) { 
+    //         console.log("CONNECTED");
+    //         var hi = JSON.stringify
+    //         ({
+    //             "kind":"appReady",
+    //             "displayID": @displayId,
+    //             "size": "@size"
+    //         });
+    //         websocket.send(hi);
+    //     };
+    // 
+    //     websocket.onclose = function(evt) { 
+    //         console.log("DISCONNECTED");
+    //         var bye = JSON.stringify
+    //         ({
+    //             "kind":"appClose",
+    //             "displayID": @displayId,
+    //             "size": "@size"
+    //         });
+    //         websocket.send(bye);
+    //     };
+    // 
+    //     websocket.onmessage = function(evt) {
+    //         var response = jQuery.parseJSON(evt.data);
+    // 
+    //         if(response.kind == "request"){
+    //             //TODO - do something here when a message from the app server arrives
+    //         }
+    //         // alert()
+    //         if(response.kind == "eventlist"){
+    //             var events = response.events;
+    // 
+    //             for (var i=0; i<events.length; i++){
+    //                 var e = events[i];
+    //                 
+    //                 // prepare event div
+    //                 var entry = $('<td></td>').attr({
+    //                     'class': 'event',
+    //                     'id' : e.id
+    //                 });
+    //                 
+    //                 // CONTENT \\
+    //                 // cover
+    //                 var coverdiv = $('<div></div>').attr('class', 'cover');
+    //                 var cover = $('<img/>').attr({
+    //                     'src': e.coverSource,
+    //                     'class' : "coverImage",
+    //                     'alt' : "Discover events with SurroundSound!"
+    //                 });
+    //                 coverdiv.append(cover);
+    //                 
+    //                 // info
+    //                 var infodiv = $('<div></div>').attr('class', 'info');
+    //                 var name = $('<h1></h1>').text(e.name);
+    //                 var date = $('<p></p>').text(e.date);
+    //                 var place = $('<p></p>').text(e.place);
+    // 
+    //                 var detailsLink = $('<p></p>').attr({
+    //                     'text' : 'details',
+    //                     'class' : 'lightbox_trigger'
+    //                 });
+    // 
+    //                 infodiv.append(date, place, name, detailsLink);
+    //                 
+    //                 // combine
+    //                 entry.append(coverdiv, infodiv);
+    //                 // alert(entry.html());
+    // 
+    //                 // add
+    //                 if (row==0) $('#row0').append(entry);
+    //                 else $('#row1').append(entry);
+    //                 row = (row+1)%2;
+    //                 // alert($('#row0').html());
+    //             }
+    //         }//if
+    // 
+    //     
+    //     //Hello World message sent from the app server
+    //     if(response.kind == "hello"){
+    //         $('#helloWorldBox').text(response.text);
+    //     }//if
+    //     
+    //     //TODO - add other messages as needed
+    //         
+    // }; //websocket.onmessage
+    // 
+    // websocket.onerror = function(evt) { 
+    //     console.log(evt.data); 
+    // }; //websocket.onerror
+    // 
+    // //---- WS
+	
+	</script>	
+    
+    
+    <script>
+    var WS = WebSocket;
+        var wsUri = "wsAddress";
+        websocket = new WS(wsUri); 
+        var displayID = 9;
+        console.log("display id: "+displayId+" ,size: "+"size");
+        websocket.onopen = function(evt) { 
+            console.log("CONNECTED");
+            var hi = JSON.stringify({
+                "kind":"appReady",
+                "displayID": displayId,
+                "size": "size"
+            });
+            websocket.send(hi);
+        };
+
+        websocket.onclose = function(evt) { 
+            console.log("DISCONNECTED");
+            var bye = JSON.stringify({
+                "kind":"appClose",
+                "displayID": displayId,
+                "size": "size"
+            });
+            websocket.send(bye);
+        };
+
+        websocket.onmessage = function(evt) {
+            var response = jQuery.parseJSON(evt.data);
+
+    //        if(response.kind == "request"){
+                //TODO - do something here when a message from the app server arrives
+    //        };
+            // alert()
+            if(response.kind == "eventlist"){
+                var events = response.events;
+
+                for (var i=0; i<events.length; i++){
+                    var e = events[i];
+                
+                    // prepare event div
+                    var entry = $('<td></td>').attr({
+                        'class': 'event',
+                        'id' : e.id
+                    });
+                
+                    // CONTENT \\
+                    // cover
+                    var coverdiv = $('<div></div>').attr('class', 'cover');
+                    var cover = $('<img/>').attr({
+                        'src': e.coverSource,
+                        'class' : "coverImage",
+                        'alt' : "Discover events with SurroundSound!"
+                    });
+                    coverdiv.append(cover);
+                
+                    // info
+                    var infodiv = $('<div></div>').attr('class', 'info');
+                    var name = $('<h1></h1>').text(e.name);
+                    var date = $('<p></p>').text(e.date);
+                    var place = $('<p></p>').text(e.place);
+
+                    var detailsLink = $('<p></p>').attr({
+                        'text' : 'details',
+                        'class' : 'lightbox_trigger'
+                    });
+
+                    infodiv.append(date, place, name, detailsLink);
+                
+                    // combine
+                    entry.append(coverdiv, infodiv);
+                    // alert(entry.html());
+
+                    // add
+                    if (row===0) {$('#row0').append(entry);}
+                    else {$('#row1').append(entry);}
+                    row = (row+1)%2;
+                    // alert($('#row0').html());
+                }
+            }//if
+
+		
+    		//Hello World message sent from the app server
+    		if(response.kind == "hello"){
+    			$('#helloWorldBox').text(response.text);
+    		}//if
+		
+    		//TODO - add other messages as needed
+			
+    	}; //websocket.onmessage
+
+    	websocket.onerror = function(evt) { 
+    		console.log(evt.data); 
+    	};
+    </script>
+
+}

@@ -1,0 +1,107 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainFullscreen.css")">
+		}
+	
+	
+<!--
+    <ul id="eventlist"></ul>
+-->
+    <table id="agenda">
+        <tr id="row0"></tr>
+        <tr id="row1"></tr>
+    </table>
+<!--
+    <ul id="row0"></ul>
+    <ul id="row1"></ul>
+-->
+	<h1 id="logotitle"><img id="logo" src="@routes.Assets.at("images/logoSS.png")" alt="SurroundSound" height="25px">SurroundSound</h1>
+    
+	<script type="text/javascript">
+	
+	//TODO add some javaScript/JQuery logic here and/or controll the logic through webSocket messages from the server
+	
+		
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+	
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+	websocket = new WS(wsUri); 
+	
+	console.log("display id: "+@displayId+" ,size: "+"@size");
+	
+	websocket.onopen = function(evt) { 
+		console.log("CONNECTED");
+		var hi = JSON.stringify
+		({
+			"kind":"appReady",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(hi);
+        // alert("I said hi to the server ;)");
+	}; //websocket.onopen
+
+	websocket.onclose = function(evt) { 
+		console.log("DISCONNECTED");
+		var bye = JSON.stringify
+		({
+			"kind":"appClose",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(bye);
+	}; //websocket.onclose
+
+	websocket.onmessage = function(evt) {
+		var response = jQuery.parseJSON(evt.data);
+		if(response.kind == "request"){
+			//TODO - do something here when a message from the app server arrives
+		}//if
+        if(response.kind == "eventlist"){
+            var events = response.events;
+            var row = 0;
+            for (var i=0; i<events.length; i++){
+                var e = events[i];
+                var node = $('<div id="'+e.id+'"></div>');
+                var cover = $('<img src="'+e.coverSource+'">');
+                var node.append(cover);
+                if (row==0) $('#row0').append(s);
+                else s1+=content;
+                row = (row+1)%2;
+                col = (col+1)%8;
+			}
+            $('#row0').append(s0);
+            $('#row1').append(s1);
+			//TODO - do something here when a message from the app server arrives
+		}//if
+
+		
+		//Hello World message sent from the app server
+		if(response.kind == "hello"){
+			$('#helloWorldBox').text(response.text);
+		}//if
+		
+		//TODO - add other messages as needed
+			
+	}; //websocket.onmessage
+
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+	
+	//---- WS
+	
+	</script>	
+
+}

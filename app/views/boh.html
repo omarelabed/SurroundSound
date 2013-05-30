@@ -1,0 +1,369 @@
+    <script type="text/javascript">
+    var WS = WebSocket;
+    var wsUri = "@wsAddress";
+    websocket = new WS(wsUri);
+    console.log("display id: "+@displayId+" ,size: "+"@size");
+    websocket.onopen = function(evt) {
+        console.log("CONNECTED");
+        var hi = JSON.stringify
+        ({
+            "kind":"appReady",
+            "displayID": @displayId,
+            "size": "@size"
+        });
+        websocket.send(hi);
+        alert('sent hi');
+        $("#agenda").hide();
+        $("#loader").show();
+    }
+    websocket.onclose = function(evt) { 
+        console.log("DISCONNECTED");
+        var bye = JSON.stringify
+        ({
+            "kind":"appClose",
+            "displayID": @displayId,
+            "size": "@size"
+        });
+        websocket.send(bye);
+    }
+    
+    // function addEvents(events, target, now) {
+    //     var row = 0;
+    //     var scrollleft = 0;
+    //     var w = 0;
+    //     var first = -1;
+    //     // so let's create the event elements!
+    //     for (var i=0; i<events.length; i++){
+    //         var e = events[i];
+    //         if (first==-1) {
+    //             first==e.id;
+    //         }
+    //         if ((now>e.startTime)&&(row==1)) {
+    //             // alert('scrollleft='+scrollleft+'; w='+w+'; scrollleft+w='+(scrollleft+w));
+    //             scrollleft+=w;
+    //             // alert(scrollleft+'+='+w);
+    //         }
+    //         if ((nextEvent==null)&&(now<e.startTime)) {
+    //             nextEvent=e.id;
+    //         }
+    //         if (now>e.startTime) {
+    //             var timing='old';
+    //         } else {
+    //             var timing='comingUp';
+    //         }
+    //         
+    //         var td = $('<td></td>').attr({
+    //             'id':e.id,
+    //             'class':timing
+    //         });
+    //         // cover
+    //         var coverspan = $('<span></span>');
+    //         td.html(coverspan);
+    //         var coverdiv = $('<div class="coverImage" style="position:relative">');
+    //         coverspan.html(coverdiv);
+    //         var coverimg = $('<img></img>').attr({
+    //             "alt":alt,
+    //             "src":e.coverSource
+    //         });
+    //         coverdiv.html(coverimg);
+    //         
+    //         // info
+    //         var infodiv = $('<div class="info"></div>');
+    //         var whendiv = $('<div class="when"></div>').text(e.date);
+    //         var wherediv = $('<div class="where"></div>').text(e.place);
+    //         var namediv = $('<h1 class="eventName"></h1>').text(e.name);
+    //         var volup = $('<img/>').attr({
+    //             'class': 'volup',
+    //             'src': "@routes.Assets.at("images/volup.png")",
+    //             'alt': ':)',
+    //             'height': "20px"
+    //         });
+    //         var voldown = $('<img/>').attr({
+    //             'class': 'voldown',
+    //             'src': "@routes.Assets.at("images/voldown.png")",
+    //             'alt': ':(',
+    //             'height': "20px"
+    //         });
+    //         var feedback = $('<div class="feedback"></div>').append(volup,voldown);
+    //         var more = $('<img></img>').attr({
+    //             'class':'more'
+    //             'src': "@routes.Assets.at("images/plus.gif")",
+    //             'alt': '+',
+    //             'height': "20px"
+    //         });
+    //         // infodiv.append(whendiv, wherediv, namediv, more);
+    //         infodiv.append(whendiv, wherediv, namediv, feedback);
+    //         td.append(infodiv);
+    //         if (row==0) {
+    //             $('#row0_'+target).append(td);
+    //         } else {
+    //             $('#row1_'+target).append(td);
+    //         }
+    //         row = (row+1)%2;
+    //         
+    //         // DETAILS
+    //         var detailsdiv = $('<div></div>').attr({
+    //             'class':'eventDetails',
+    //             'id':'details_'+e.id
+    //         });
+    //         var detailsImage = $('<img></img>').attr({
+    //             'src':e.coverSource,
+    //             'alt':alt
+    //         });
+    //         var placelink = 'https://maps.google.ch/maps?q='+e.place.split(' ').join('+');
+    //         var place = e.place.split(' ').join('+');
+    //         var locURL = 'https://maps.google.ch/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q='+place+'&amp;hnear='+place+'&amp;z=14&amp;output=embed';
+    //         var maplink = $('<a></a>').text('Map').attr('href',placelink);
+    //         var map0 = $('<iframe></iframe>').attr({
+    //             'width' : "425",
+    //             'height' : "350",
+    //             'frameborder' : "0",
+    //             'scrolling' : "no",
+    //             'marginheight' : "0",
+    //             'marginwidth' : "0",
+    //             'src' : locURL //placelink//+";output=embed"
+    //         });//.append($('<br />'));
+    //         var map = $('<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src='+locURL+'></iframe>');
+    //         // '<iframe       ></iframe><br />
+    //         // var externalmap = '<small><a href="'+'https://maps.google.ch/maps?q='+e.place+';source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>'
+    //         var detailsTable = $('<table></table>');
+    //         var det0 = $('<td></td>').html(detailsImage);
+    //         var description = $('<td></td>');
+    //         if (e.description!=null){
+    //             description.html($('<h3 width="20%"></h3>').text(e.description));
+    //         }
+    //         var det1 = $('<td></td>').html(infodiv.clone());
+    //         var det2 = $('<td></td>').html(map);
+    //         var detrow = $('<tr></tr>').append(det0,det1,description,det2);
+    //         // detrow.append();
+    //         detailsTable.append(detrow);
+    //         detailsdiv.append(detailsTable);
+    //         $('#hidden').append(detailsdiv);
+    //         w = parseInt($('td').css('width'));
+    //     }
+    //     $('#loader').hide();
+    //     $('#agenda').show();
+    //     var offset = $('#'+nextEvent).offset();
+    //     $('html, body').animate({
+    //         scrollLeft: offset.left
+    //     });
+    // }
+    
+    var nextEvent = null;
+    websocket.onmessage = function(evt) {
+        console.log("CLIENT GOT MESSAGE FROM SERVER");
+        var now = new Date().getTime();
+        // convert to json
+        var response = $.parseJSON(evt.data);
+        var alt="Discover events with SurroundSound!";
+
+        if(response.kind == "events") {
+            var pastEvents = response.past;
+            addEvents(pastEvents,'past',now);
+            var todaysEvents = response.today;
+            addEvents(todaysEvents,'today',now);
+            var tomorrowsEvents = response.tomorrow;
+            addEvents(tomorrowsEvents,'tomorrow',now);
+            var soonEvents = response.soon;
+            addEvents(soonEvents,'soon',now);
+        }
+
+        // Got an eventlist? Great! :D
+        if(response.kind == "eventlist") {
+            var events = response.events;
+            addEvents(events,'agenda');
+            var row = 0;
+            var scrollleft = 0;
+            var w = 0;
+            var first = -1;
+            // so let's create the event elements!
+            for (var i=0; i<events.length; i++){
+                var e = events[i];
+                if (first==-1) {
+                    first==e.id;
+                }
+                // if ((now>e.startTime)&&(row==1)) {
+                //     // alert('scrollleft='+scrollleft+'; w='+w+'; scrollleft+w='+(scrollleft+w));
+                //     scrollleft+=w;
+                //     // alert(scrollleft+'+='+w);
+                // }
+                if ((nextEvent==null)&&(now<e.startTime)) {
+                    nextEvent=e.id;
+                }
+                if (now>e.startTime) {
+                    var timing='old';
+                } else {
+                    var timing='comingUp';
+                }
+                
+                var td = $('<td></td>').attr({
+                    'id':e.id,
+                    'class':timing
+                });
+                // cover
+                var coverspan = $('<span></span>');
+                td.html(coverspan);
+                var coverdiv = $('<div class="coverImage" style="position:relative">');
+                coverspan.html(coverdiv);
+                var coverimg = $('<img></img>').attr({
+                    "alt":alt,
+                    "src":e.coverSource
+                });
+                coverdiv.html(coverimg);
+                
+                // info
+                var infodiv = $('<div class="info"></div>');
+                var whendiv = $('<div class="when"></div>').text(e.date);
+                var wherediv = $('<div class="where"></div>').text(e.place);
+                var namediv = $('<h1 class="eventName"></h1>').text(e.name);
+                var volup = $('<img/>').attr({
+                    'class': 'volup',
+                    'src': "@routes.Assets.at("images/volup.png")",
+                    'alt': ':)',
+                    'height': "20px"
+                });
+                var voldown = $('<img/>').attr({
+                    'class': 'voldown',
+                    'src': "@routes.Assets.at("images/voldown.png")",
+                    'alt': ':(',
+                    'height': "20px"
+                });
+                var feedback = $('<div class="feedback"></div>').append(volup,voldown);
+                var more = $('<img></img>').attr({
+                    'class':'more'
+                    'src': "@routes.Assets.at("images/plus.gif")",
+                    'alt': '+',
+                    'height': "20px"
+                });
+                // infodiv.append(whendiv, wherediv, namediv, more);
+                infodiv.append(whendiv, wherediv, namediv, feedback);
+                td.append(infodiv);
+                if (row==0) {
+                    $('#row0').append(td);
+                } else {
+                    $('#row1').append(td);
+                }
+                row = (row+1)%2;
+                
+                // DETAILS
+                var detailsdiv = $('<div></div>').attr({
+                    'class':'eventDetails',
+                    'id':'details_'+e.id
+                });
+                var detailsImage = $('<img></img>').attr({
+                    'src':e.coverSource,
+                    'alt':alt
+                });
+                var placelink = 'https://maps.google.ch/maps?q='+e.place.split(' ').join('+');
+                var place = e.place.split(' ').join('+');
+                var locURL = 'https://maps.google.ch/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q='+place+'&amp;hnear='+place+'&amp;z=14&amp;output=embed';
+                var maplink = $('<a></a>').text('Map').attr('href',placelink);
+                var map0 = $('<iframe></iframe>').attr({
+                    'width' : "425",
+                    'height' : "350",
+                    'frameborder' : "0",
+                    'scrolling' : "no",
+                    'marginheight' : "0",
+                    'marginwidth' : "0",
+                    'src' : locURL //placelink//+";output=embed"
+                });//.append($('<br />'));
+                var map = $('<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src='+locURL+'></iframe>');
+                // '<iframe       ></iframe><br />
+                // var externalmap = '<small><a href="'+'https://maps.google.ch/maps?q='+e.place+';source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>'
+                var detailsTable = $('<table></table>');
+                var det0 = $('<td></td>').html(detailsImage);
+                var description = $('<td></td>');
+                if (e.description!=null){
+                    description.html($('<h3 width="20%"></h3>').text(e.description));
+                }
+                var det1 = $('<td></td>').html(infodiv.clone());
+                var det2 = $('<td></td>').html(map);
+                var detrow = $('<tr></tr>').append(det0,det1,description,det2);
+                // detrow.append();
+                detailsTable.append(detrow);
+                detailsdiv.append(detailsTable);
+                $('#hidden').append(detailsdiv);
+                w = parseInt($('td').css('width'));
+            }
+            $('#loader').hide();
+            $('#agenda').show();
+            var offset = $('#'+nextEvent).offset();
+            $('html, body').animate({
+                scrollLeft: offset.left
+            });
+        }
+    }
+    
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	};
+    
+    // simple lightbox
+    jQuery(document).ready(function($) {
+        alert('ready');
+        $('.volup').live('click', function() {
+            var id = $(this).closest('td').attr('id');
+            var up = JSON.stringify({
+                "kind":"volup",
+                "displayID": @displayId,
+                'eventId': id
+            });
+            websocket.send(up);
+        });
+        $('td').live('click', function(e) {
+            //prevent default action (hyperlink)
+            e.preventDefault();
+
+            //Get clicked link href
+            var image_href = $(this).attr("src");
+
+            var imgnode = $('<img></img>');
+            var detailsNode = $('#details_'+$(this).attr('id'));
+            imgnode.attr("src", image_href);
+
+            if ($('#lightbox').length > 0) { // #lightbox exists
+                //place href as img src value
+                // $('#content').html('<img src="' + image_href + '" />');
+                //show lightbox window - you could use .show('fast') for a transition
+                $('#content').html(detailsNode);
+                $('#lightbox').show();
+            }
+            else { //#lightbox does not exist - create and insert (runs 1st time only)
+                //create HTML markup for lightbox window
+                var lightbox = $('<div></div>');
+                lightbox.attr('id', 'lightbox');
+                var p0 = $('<p></p>').text("Click to close, if you wannawanna close");
+                lightbox.html(p0);
+                var div0 = $('<div></div>');
+                div0.attr('id', 'content');
+                div0.html(detailsNode);
+                lightbox.append(div0);
+                $('body').append(lightbox);
+            }
+        });
+        //Click anywhere on the page to get rid of lightbox window
+        $('#lightbox').live('click', function() {
+            $('#lightbox').hide();
+        });
+    });
+
+    $('#logo').live('click', function () {
+        // alert('just clicked on the logo! will you scroll to '+'#'+nextEvent+'??');
+        
+        var offset = $('#'+nextEvent).offset();
+        $('html, body').animate({
+            scrollLeft: offset.left
+        });
+    })
+
+    $().ready(function() {
+        var $scrollingDiv = $("#scrollingDiv");
+
+        $(window).scroll(function(){
+            $scrollingDiv
+            .stop()
+            .animate({"marginLeft": ($(window).scrollLeft() + ($(window).width()/2)) + "px"}, "fast" );
+        });
+    });
+    
+    </script>

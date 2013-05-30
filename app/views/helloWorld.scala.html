@@ -1,0 +1,93 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainFullscreen.css")">
+		}
+	
+	
+	<button type="button" onclick="sendMessageToServer()">Button - send helloWorld message to the server</button>
+	
+	<div id="helloWorldBox"></div>
+	
+	<script type="text/javascript">
+	
+	//TODO add some javaScript/JQuery logic here and/or control the logic through webSocket messages from the server
+	
+	function sendMessageToServer() {
+		var hi = JSON.stringify
+		({
+			"kind":"helloWorld",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(hi);
+	}
+		
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+	
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+	websocket = new WS(wsUri); 
+	
+	console.log("display id: "+@displayId+" ,size: "+"@size");
+	
+	websocket.onopen = function(evt) { 
+		console.log("CONNECTED"); 
+		var hi = JSON.stringify
+		({
+			"kind":"appReady",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(hi);
+	}; //websocket.onopen
+
+	websocket.onclose = function(evt) { 
+		console.log("DISCONNECTED");
+		var bye = JSON.stringify
+		({
+			"kind":"appClose",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(bye);
+	}; //websocket.onclose
+
+	websocket.onmessage = function(evt) {
+		var response = jQuery.parseJSON(evt.data);
+		
+		if(response.kind == "request"){
+			//TODO - do something here when a message from the app server arrives
+		}//if
+		
+		//Hello World message sent from the app server
+		if(response.kind == "hello"){
+			$('#helloWorldBox').text(response.text);
+		}//if
+		
+		if(response.kind == "thisIsAReplyToHelloWorld"){
+			$('#helloWorldBox').text(response.customField1+response.customField2+response.customField3);
+		}//if
+		
+		//TODO - add other messages as needed
+			
+	}; //websocket.onmessage
+
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+	
+	//---- WS
+	
+	</script>	
+
+}

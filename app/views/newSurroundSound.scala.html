@@ -1,0 +1,171 @@
+@(displayId: String, wsAddress: String, size: String)
+
+@main("HelloWorld App on UsiDisplay!") {
+
+		@if(size == "small"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainSmall.css")">
+		}
+		@if(size == "big"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainBig.css")">
+		}
+		@if(size == "fullscreen"){
+			<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/newMainFullscreen.css")">
+		}
+	
+    <div id="container">
+        <div id="agenda">
+        </div>
+
+    <div id="footer"><h1 id="logotitle"><img id="logo" src="/assets/images/logoSS.png" alt="SurroundSound" height="25px">SurroundSound</h1></div>
+    </div>
+    
+	<script type="text/javascript">
+	
+	//TODO add some javaScript/JQuery logic here and/or controll the logic through webSocket messages from the server
+	
+		
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+	
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+	websocket = new WS(wsUri); 
+	
+	console.log("display id: "+@displayId+" ,size: "+"@size");
+	
+	websocket.onopen = function(evt) { 
+		console.log("CONNECTED");
+		var hi = JSON.stringify
+		({
+			"kind":"appReady",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(hi);
+        // alert("I said hi to the server ;)");
+	}; //websocket.onopen
+
+	websocket.onclose = function(evt) { 
+		console.log("DISCONNECTED");
+		var bye = JSON.stringify
+		({
+			"kind":"appClose",
+			"displayID": @displayId,
+			"size": "@size"
+		});
+		websocket.send(bye);
+	}; //websocket.onclose
+
+	websocket.onmessage = function(evt) {
+        // alert("I just got a message!");
+		var response = jQuery.parseJSON(evt.data);
+		
+		if(response.kind == "request"){
+			//TODO - do something here when a message from the app server arrives
+		}//if
+        if(response.kind == "eventlist"){
+            var events = response.events;
+            alert(events[0].name);
+            var s0='';
+            var s1='';
+            var s='';
+            var link0 = '<a href="https://www.facebook.com/events/';
+            var link1 = '">';
+            var link2 = '</a>';
+            var column0='<div class="column">';
+            var level00='<div class="event level0">';
+            var level10='<div class="event level1">';
+            var cover0='<div class="cover"><img src="';
+            var cover1='" alt="SurroundSound is gooooood">';
+            var date0='<div class="date">';
+            var location0 = '<div class="location">';
+            var name0 = '<div class="name">';
+            var info0 = '<div class="info">';
+            var cdiv0 = '</div>';
+            var cdiv = '</div>';
+            // var img0='<div class="eventCover"><img src="';
+            // var img1='" style="top:';
+            // var img2='px;" alt="Discover events with SurroundSound!"></div>';
+            // var close='</div>';
+            // var img='';
+            // var text='';
+            var level = 0;
+            // var col = 0;
+            // var date = '';
+            // obj = events[0];
+            // var dump = '';
+            // for (property in obj) dump += property + ': ' + obj[property]+'; ';
+            // alert(dump);
+            for (var i=0; i<events.length; i++){
+                // alert('events '+i);
+                // get event e
+                var e = events[i];
+
+                // create new column if fresh one is needed
+                if (level==0) s+=column0;
+                
+                // start creating the event element
+                var evnt='';
+                // select between upper (0) and lower (1) event
+                if (level==0) {
+                    // alert('level='+level);
+                    evnt+=level00;
+                } 
+                else {
+                    // alert('level='+level);
+                    evnt+=level10;
+                }
+                // I dunno why I'm doing this switching, but it makes me feel just a bit more confortable...I dunno, I told you!
+                
+                // add the contents of the event
+                // alert(evnt);
+                // alert("cover0: "+cover0);
+                // alert("e.coverSource: "+e.coverSource);
+                // alert("cover1: "+cover1);
+                // alert("cdiv: "+cdiv);
+                evnt+=cover0+e.coverSource+cover1+cdiv; // create the cover element node of e
+                // alert(evnt);
+                evnt+=date0+e.date+cdiv; // create date element node of e
+                // alert(evnt);
+                evnt+=location0+e.location+cdiv; // create location el'node of e
+                // alert(evnt);
+                evnt+=link0+e.id+link1+name0+'<h1>'+e.name+'</h1>'+link2+cdiv;
+                
+                // alert(evnt);
+
+                evnt+=cdiv; // close the eventX div
+
+                // finally add the whole content of the event to the main string s
+                s+=evnt;
+
+                if (level==1) s+=cdiv; // close the column div in case the second event (1) of the column has been added
+                level = (level+1)%2; // update the level
+            }
+            if (level==0) s+=cdiv; // close column in case the number of events is odd
+            // $('#row0').append(s0);
+            // $('#row1').append(s1);
+            alert(s);
+            $('#agenda').append(s);
+            // $('#eventlist').append(s);
+			//TODO - do something here when a message from the app server arrives
+		}//if
+
+		
+		//Hello World message sent from the app server
+		if(response.kind == "hello"){
+			$('#helloWorldBox').text(response.text);
+		}//if
+		
+		//TODO - add other messages as needed
+			
+	}; //websocket.onmessage
+
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+	
+	//---- WS
+	
+	</script>	
+
+}

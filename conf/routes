@@ -1,0 +1,17 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /SurroundSound/             controllers.SurroundSoundController.index(id: String ?= null, size: String ?= null)
+GET     /							controllers.SurroundSoundController.index(id: String ?= null, size: String ?= null)
+# GET	/SurroundSound/event/*id	controllers.SurroundSoundController.eventDetails(id: Long)
+GET     /test/                    	controllers.SurroundSoundController.test(id: String ?= null, size: String ?= null)
+
+# Sockets
+GET		/SurroundSound/socket		controllers.SurroundSoundController.webSocket
+# Create a dump Page!!
+#GET	/SurroundSound/*eventId		controllers.SurroundSoundController.showEventDetails(eventId: Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
