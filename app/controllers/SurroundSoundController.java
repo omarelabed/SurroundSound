@@ -57,8 +57,8 @@ public class SurroundSoundController extends Controller {
 
 	public static final long REFRESH_RATE = 18000000; //18000000;// 3 minutes  // (In milliseconds)
 	public static String appName = "SurroundSound";
-	public static String wsAddress = "ws://pdnet.inf.unisi.ch:6660/SurroundSound/socket";
-//	public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
+    public static String wsAddress = "ws://pdnet.inf.unisi.ch:2222/SurroundSound/socket";
+    // public static String wsAddress = "ws://localhost:1313/SurroundSound/socket";
 	//display size: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
 	public static HashMap<String, Sockets> displaySockets = new HashMap<String, Sockets>();
@@ -67,35 +67,35 @@ public class SurroundSoundController extends Controller {
 	
 	public static FacebookClient FB_CLIENT;
 
-	private static String[] pageNamesArr = {
-		"52722248335",
-		"88585210034",
-		"115823771813441",
-		"122909424460471",
-		"Acbess.GSV",
-		"aiesec.lugano",
-		"arteurbanalugano",
-		"baroopslugano",
-		"BeatCircusMusicFestival",
-		"classcafelugano",
-		"cluboneofficial",
-		"estivaljazz",
-		"estivalugano",
-		"foce.lugano",
-		"garagemusiccastione",
-        "lugano.buskers",
-		"lugano.bynight",
-		"lusti.org",
-		"milklugano",
-		"pastoraleuniversitaria.lugano",
-		"skiweekofficial",
-		"theoriginalslugano",
-		"usiuniversity",
-		"vivacafe.lugano",
-		"wkndlugano"
-	};
+    // private static String[] pageNamesArr = {
+    //     "52722248335",
+    //     "88585210034",
+    //     "115823771813441",
+    //     "122909424460471",
+    //     "Acbess.GSV",
+    //     "aiesec.lugano",
+    //     "arteurbanalugano",
+    //     "baroopslugano",
+    //     "BeatCircusMusicFestival",
+    //     "classcafelugano",
+    //     "cluboneofficial",
+    //     "estivaljazz",
+    //     "estivalugano",
+    //     "foce.lugano",
+    //     "garagemusiccastione",
+    //         "lugano.buskers",
+    //     "lugano.bynight",
+    //     "lusti.org",
+    //     "milklugano",
+    //     "pastoraleuniversitaria.lugano",
+    //     "skiweekofficial",
+    //     "theoriginalslugano",
+    //     "usiuniversity",
+    //     "vivacafe.lugano",
+    //     "wkndlugano"
+    // };
 	
-	public static ArrayList<String> pageNames = new ArrayList<String>(Arrays.asList(pageNamesArr));
+    // public static ArrayList<String> pageNames = new ArrayList<String>(Arrays.asList(pageNamesArr));
 	private static ArrayList<Long> pageIds = new ArrayList<Long>();
 	private static ArrayList<SurroundSoundFbPage> ssFbPages = new ArrayList<SurroundSoundFbPage>();
 	private static int lastCount = 0; 
@@ -169,24 +169,14 @@ public class SurroundSoundController extends Controller {
 			int eMonth = startTime.get(Calendar.MONTH);
 			int eYear = startTime.get(Calendar.YEAR);
 			long timeInMillis = startTime.getTimeInMillis();
-//			Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
+            Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
 			startTime.setTimeInMillis(timeInMillis);
 //			Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
-			if ((currentDay>eDay)
-					&&(currentMonth>=eMonth)
-					&&(currentYear>=eYear)){
-				past.add(e);
-			} else if ((currentDay==eDay)
-					&&(currentMonth==eMonth)
-					&&(currentYear==eYear)) {
-				today.add(e);
-//			} else if ((currentDay+1==eDay)
-//					&&(currentMonth==eMonth)
-//					&&(currentYear==eYear)){
-//				tomorrow.add(e);
-			} else {
-				soon.add(e);
-			}
+			if (eYear<currentYear) past.add(e);
+            else if ((eYear==currentYear)&&(eMonth<currentMonth)) past.add(e);
+            else if ((eYear==currentYear)&&(eMonth==currentMonth)&&(eDay<currentDay)) past.add(e);
+			else if ((currentDay==eDay)&&(currentMonth==eMonth)&&(currentYear==eYear)) today.add(e);
+            else soon.add(e);
 		}
 		JsonNode jPast = Json.toJson(past);
 		msg.put("past", jPast);
@@ -347,29 +337,29 @@ public class SurroundSoundController extends Controller {
 
 		Logger.info("Fetching events...");
 
-		initPageIds();
+        // initPageIds();
 		collectData();
 //		Logger.info("Page IDs"+pageIds);
 	}
 
-	private static void initPageIds() {
-//		Logger.info("initPageIds()");
-		int l = pageNames.size();
-		for (int i = 0; i < l; i++) {
-			String pagename = pageNames.get(i);
-			try {
-				Page page = FB_CLIENT.fetchObject(pagename, Page.class);
-				String idString = page.getId();
-				pageIds.add(new Long(idString));
-//				Logger.info("\tgot "+pagename+"'s id: "+idString);
-			} catch (FacebookOAuthException e) {
-				Logger.error("I couldn't get the ID of "+pagename,e);
-				Logger.info("We might need a new AccessToken! Please check its validity");
-//				refreshAccessToken();
-				return;
-			}
-		}
-	}
+//     private static void initPageIds() {
+// //        Logger.info("initPageIds()");
+//         int l = pageNames.size();
+//         for (int i = 0; i < l; i++) {
+//             String pagename = pageNames.get(i);
+//             try {
+//                 Page page = FB_CLIENT.fetchObject(pagename, Page.class);
+//                 String idString = page.getId();
+//                 pageIds.add(new Long(idString));
+// //                Logger.info("\tgot "+pagename+"'s id: "+idString);
+//             } catch (FacebookOAuthException e) {
+//                 Logger.error("I couldn't get the ID of "+pagename,e);
+//                 Logger.info("We might need a new AccessToken! Please check its validity");
+// //                refreshAccessToken();
+//                 return;
+//             }
+//         }
+//     }
 
 	// from http://stackoverflow.com/questions/1485708/how-do-i-do-a-http-get-in-java
 //	private static void refreshAccessToken() {
