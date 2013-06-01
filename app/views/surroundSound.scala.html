@@ -186,9 +186,10 @@
     var countDownTime = 5; // default: 20
     var timer = 0;
     var isHome = true;
+    var detailsClosed=true;
     function react(){
-        $('html, #agenda').stop();
         isHome = false;
+        $('html, #agenda').stop();
         resetTimer();
         // monitor("resetTimer() ", timer);
     }
@@ -200,12 +201,15 @@
         var inactiveTime = setInterval(function() {
             timer = timer + 1;
             // monitor('countdown: ',countDownTime-timer);
-            if (timer > countDownTime) {
+            if (detailsClosed&&(timer > countDownTime)) {
                 if (!isHome) {
                     goHome();
                     isHome=true;
                 };
                 resetTimer();
+            } else if (!detailsClosed&&(timer > countDownTime)) {
+                $('#lightbox').hide('slow');
+                detailsClosed=true;
             }
         }, 1000); // 1 minute
     })
@@ -437,7 +441,6 @@
     //         }, "fast" );
     //     });
     // });
-    
     function createLightbox(){
         var lightbox = $('<div></div>').attr('id', 'lightbox');
         var close = $('<img/>').attr({
@@ -453,22 +456,144 @@
         $('body').append(lightbox);
         close.bind('click', function(){
             lightbox.hide('slow');
+            detailsClosed = true;
+            goHome();
         })
     }
     
     var lastLightbox;
     function showLightbox() {
+        detailsClosed=false;
         $('#lightbox').show('slow');
     }
     
     function makeDetails(e) {
+        // available data on input event e
+        // id = e.id;
+        // name = e.name;
+        // place = e.place;
+        // description = e.description;
+        // startTime = e.startTime;
+        // endTime = e.endTime;
+        // location = e.location;
+        // venue = e.venue;
+        // coverSource = e.coverSource;
+        // attendance = attendance;
+        // karma = e.karma;
+        // date = e.date;
+        // time = e.time;
+        // day = e.day;
         console.log('TODO: define a function that creates lightbox content for');
         console.log(e);
-        var div = $('<div></div>');
-        var title = $('<h1></h1>').text(e.name);
-        div.html(title);
-        var temp = $('#'+e.id).clone();
-        return temp;
+        
+        // the main container of the details
+        var mainbox = $('<div></div>').attr({
+            'class':'details'
+        });
+        
+        // image container
+        var posterbox = $('<div></div>').attr({
+            'id':'details_imgbox',
+            'class':'details_content'
+        });
+        var poster = $('<img/>').attr({
+            'src':e.coverSource,
+            'alt':e.name
+        });
+        posterbox.html(poster);
+        // add it to the main box
+        mainbox.append(posterbox);
+        
+        // main info container
+        var maininfobox = $('<div></div>').attr({
+            'id':'details_infobox',
+            'class':'details_content'
+        });
+        // text header
+        // var infoHeader = $('<div></div>').attr({
+        //     'id':'details_infoheader'
+        // });
+        var eventName = $('<h1></h1>').text(e.name);
+        var eventDate = $('<h1></h1>').text(e.day+' '+e.date+', '+e.time);
+        var eventLocation = $('<h1></h1>').text(e.place);
+        maininfobox.append(eventName,eventDate,eventLocation);
+        // update mainbox
+        mainbox.append(maininfobox);
+        
+        // "more deails" box
+        var moreDetails = $('<div></div>').attr({
+            'id':'moreDetails',
+            'class':'details_content'
+        });
+        // "more details" tabs header
+        var moreDetailsTabs = $('<div></div>').attr({
+            'id':'moreDetailsTabs'
+        });
+        moreDetails.append(moreDetailsTabs);
+        
+        // "more details" box content
+        var moreDetailsContent = $('<div></div>').attr({
+            'id':'moreDetailsContent'
+        });
+        moreDetails.append(moreDetailsContent);
+        
+        // content 1: description
+        var eventDescription = $('<p></p>').attr({
+            'id':'eventDescription'
+        }).text(e.description);
+        // content 2: map
+        // var map = $('<div></div>').attr({
+        //     'id':'map'
+        // }).text("TODO: get the google map search result :P");
+        var placelink = 'http://maps.google.ch/maps?q='+e.place.split(' ').join('+');
+        var place = e.place.split(' ').join('+');
+        var locURL = 'http://maps.google.ch/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q='+place+'&amp;hnear='+place+'&amp;z=14&amp;output=embed';
+        // var maplink = $('<a></a>').text('Map').attr('href',placelink);
+        // var map0 = $('<iframe></iframe>').attr({
+        //     'width' : "425",
+        //     'height' : "350",
+        //     'frameborder' : "0",
+        //     'scrolling' : "no",
+        //     'marginheight' : "0",
+        //     'marginwidth' : "0",
+        //     'src' : locURL //placelink//+";output=embed"
+        // });//.append($('<br />'));
+        console.log('Query URL: '+locURL);
+        var map = $('<iframe width="100%" height="714px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src='+locURL+'></iframe>');
+        // '<iframe       ></iframe><br />
+        // // var externalmap = '<small><a href="'+'https://maps.google.ch/maps?q='+e.place+';source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>'
+        
+        
+        // "more details" tabs
+        //      description tab
+        var descriptionTab = $('<a></a>').text('Description | ').attr({
+            'id':'descriptionTab',
+            'class':'detailsTab'
+        }).bind('click', function(){
+            moreDetailsContent.html(eventDescription);
+            descriptionTab.css('color','white');
+            mapTab.css('color','grey');
+        });
+        //      map tab
+        var mapTab = $('<a></a>').text('Map (Beta)').attr({
+            'id':'mapTab',
+            'class':'detailsTab'
+        }).bind('click', function(){
+            moreDetailsContent.html(map);
+            mapTab.css('color','white');
+            descriptionTab.css('color','grey');
+        });
+        moreDetailsTabs.append(descriptionTab,mapTab);
+        
+        // default "more details" content
+        moreDetailsContent.html(eventDescription);
+
+        // add "more details" it to the main box
+        mainbox.append(moreDetails);
+        // console.log('poster.css(\'width\'): '+poster.css('width'));
+        // descriptionbox.css('width',poster.css('width')+'px');
+        // var temp = $('#'+e.id).clone();
+        return mainbox;
     }
     
     // shows the details of event with the given id
