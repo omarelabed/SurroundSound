@@ -29,7 +29,7 @@
         <center id="loader"><img style="{padding: 50px}" src="@routes.Assets.at("images/preloader.gif")" alt"Loading..."></center>
         
         <div class="content">
-    <div id='agenda' style='display:none;'>
+    <div class='pep x' id='agenda' style='display:none;'>
         <table id='agenda_table'>
             <tr>
                 <td class='bigbox leftlined' valign='top' id="past_view" style='display:none;'>
@@ -83,6 +83,7 @@
     
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="@routes.Assets.at("javascripts/jquery.mCustomScrollbar.concat.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/jquery.pep.js")"></script>
 
     <script type="text/javascript">
     
@@ -266,7 +267,7 @@
         // info
         var infodiv = $('<div class="info"></div>');
         var whendiv = $('<div class="when"></div>').text(e.day+' | '+e.date+' | '+e.time);
-        var wherediv = $('<div class="where"></div>').text(e.place);
+        var wherediv = $('<div class="where"></div>').html($('<h2></h2>')).text(e.place);
         var nameString = e.name;
         if (nameString.length>60){
             nameString=nameString.substr(0,56)+'...';
@@ -616,6 +617,12 @@
         console.log(eventsCollection);
     }
     
+    $(document).ready(function(){
+        // $('.pep.x').pep({ axis: 'x', debug: false });
+        $('.pep.x').pep({ axis: 'x'});
+      // $('.pep.y').pep({ axis: 'y', debug: true });
+      // $('.pep.noease').pep({ axis: 'y', shouldEase: false, debug: true });
+    });
     
 
     </script>
