@@ -591,10 +591,10 @@
         if (lastLightbox!=id){
             var e = eventsCollection['event_'+id];
             var details = makeDetails(e);
-            var m = ($('header').height()*2)+'px';
+            var m = ($('header').height())+'px';
             console.log(details);
             $('#lightbox_content').html(details).css({
-                'margin': m,
+                'margin-left': m,
             });
         }
         showLightbox();
