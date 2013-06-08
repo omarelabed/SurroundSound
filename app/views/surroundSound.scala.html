@@ -397,7 +397,7 @@
     function goTo(offset){
         var w = $('#agenda_table').width();
         monitor('agenda_table width: ', w);
-        var t = w*10;
+        var t = w*3;
         monitor('t = ', t);
         $('html, #agenda').animate({
             scrollLeft: offset+'px'
@@ -428,10 +428,12 @@
 
     function createLightbox(){
         var lightbox = $('<div></div>').attr('id', 'lightbox');
-        var close = $('<img/>').attr({
+        var close = $('<div></div>').attr({
             'id':'close',
-            'src':"@routes.Assets.at("images/close.jpg")",
-            'alt':'close'
+            'background-image':"@routes.Assets.at("images/close.jpg")",
+            'alt':'close',
+            'height':'48px',
+            'width':'48px'
         }).css({
             'margin-top':$('header').height()+'px'
         });
