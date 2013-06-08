@@ -619,7 +619,13 @@
     
     $(document).ready(function(){
         // $('.pep.x').pep({ axis: 'x', debug: false });
-        $('.pep.x').pep({constrainTo: 'parent', axis: 'x'});
+        $('.pep.x').pep({
+            constrainTo: 'parent',
+            axis: 'x'
+            easeDuration: 500,
+            drag: handlePull,
+            useCSSTranslation: false
+        });
       // $('.pep.y').pep({ axis: 'y', debug: true });
       // $('.pep.noease').pep({ axis: 'y', shouldEase: false, debug: true });
     });
