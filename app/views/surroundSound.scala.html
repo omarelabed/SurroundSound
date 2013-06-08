@@ -591,8 +591,8 @@
         if (lastLightbox!=id){
             var e = eventsCollection['event_'+id];
             var details = makeDetails(e);
-            var m = ($('header').height()*2)+'px';
-            // var m = '0px';
+            // var m = ($('header').height()*2)+'px';
+            var m = '0px';
             console.log(details);
             $('#lightbox_content').html(details).css({
                 'margin-left': m,
