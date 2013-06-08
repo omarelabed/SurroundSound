@@ -284,11 +284,10 @@ span {
     font-size:200%;
 }
 #details_infobox{
-    max-width:222px;
+    max-width:600px;
 }
 #moreDetails{
 /*    float:right;*/
-    width: 600px;
     width: 600px;
 }
 
