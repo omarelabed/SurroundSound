@@ -183,7 +183,7 @@
     }
     
 
-    var countDownTime = 20; // default: 20
+    var countDownTime = 60; // default: 20
     var timer = 0;
     var isHome = true;
     var detailsClosed=true;
@@ -196,7 +196,8 @@
     function resetTimer(){
         timer=0;
     }
-    $(document).bind("scroll click keydown keyup", react);
+    // $(document).bind("scroll click keydown keyup", react);
+    $(window).bind("scroll click keydown keyup", react);
     $(document).ready(function () {
         var inactiveTime = setInterval(function() {
             timer = timer + 1;

@@ -266,7 +266,7 @@ public class SurroundSoundController extends Controller {
 
 	public static void startEventsScheduler(){
 		Logger.info("eventsScheduler() ---- START SCHEDULER ---");
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 10, TimeUnit.SECONDS);
+		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 2, TimeUnit.MINUTES);
 	}
 
 	//should end with the application
