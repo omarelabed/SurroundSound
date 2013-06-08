@@ -428,12 +428,10 @@
 
     function createLightbox(){
         var lightbox = $('<div></div>').attr('id', 'lightbox');
-        var close = $('<div></div>').attr({
+        var close = $('<img/>').attr({
             'id':'close',
-            'background-image':"@routes.Assets.at("images/close.jpg")",
-            'alt':'close',
-            'height':'48px',
-            'width':'48px'
+            'src':"@routes.Assets.at("images/close.jpg")",
+            'alt':'close'
         }).css({
             'margin-top':$('header').height()+'px'
         });
