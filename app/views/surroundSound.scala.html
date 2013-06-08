@@ -393,7 +393,7 @@
     function goTo(offset){
         var w = $('#agenda_table').width();
         monitor('agenda_table width: ', w);
-        var t = w;
+        var t = w*10;
         monitor('t = ', t);
         $('html, #agenda').animate({
             scrollLeft: offset+'px'
