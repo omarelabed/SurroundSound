@@ -189,7 +189,7 @@ body {
 }
 
 #close {
-    float:right;
+/*    float:right;*/
     z-index:10000;
 }
 /*
