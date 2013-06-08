@@ -1,6 +1,11 @@
 /* [START] style for the "Yeah!" version */
 /* once this version is complete, you can check for not used styles */
 
+body {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
 header {
     padding-top:4px;
     background-color: black;
