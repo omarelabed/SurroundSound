@@ -275,9 +275,15 @@ span {
     overflow-x:hidden;
     height: 300px;
 }
-
+.detailsTitle{
+    font-size:200%;
+}
+##details_infobox{
+    max-width:222px;
+}
 #moreDetails{
 /*    float:right;*/
+    width: 600px;
     width: 600px;
 }
 
