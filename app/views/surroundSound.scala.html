@@ -196,7 +196,7 @@
     function resetTimer(){
         timer=0;
     }
-    $(document).bind("click keydown keyup", react);
+    $(document).bind("scroll click keydown keyup", react);
     $(document).ready(function () {
         var inactiveTime = setInterval(function() {
             timer = timer + 1;
