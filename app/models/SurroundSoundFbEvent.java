@@ -3,6 +3,7 @@ package models;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 
 import org.codehaus.jackson.JsonNode;
 
+import com.avaje.ebean.Query;
 import com.restfb.Connection;
 import com.restfb.Parameter;
 import com.restfb.json.JsonArray;
@@ -38,6 +40,7 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 	@Id
 	public Long id;
 
+	// facebook related data
 	public String name;
 	public String ownerName;
 	public String ownerId;
@@ -51,6 +54,7 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 	public String privacy;
 	public Date updateTime;
 
+	// the page, or owner of the event
 	public Long pageId;
 
 	// cover
@@ -64,26 +68,16 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 	public String time;
 	public String day;
 
+	// cover
 	public Long coverOffset;
 
+	// additional data
 	public int attendance;
-
 	public String place;
-
 	public String link;
-
 	public int karma;
-
-
-	//	@ManyToOne
-	//	public SurroundSoundFbPage page;
-	//	@ManyToMany
-	//	public List<SurroundSoundFbUser> attending = new ArrayList<SurroundSoundFbUser>();
-	//	@OneToOne
-	//	public SurroundSoundFbCover cover;
-
-	//	public String troll;
-
+	// timeFlag can be either "past", "today" or "soon"
+	public String timeFlag;
 
 	public static Finder<Long, SurroundSoundFbEvent> finder = new Finder<Long, SurroundSoundFbEvent>(Long.class, SurroundSoundFbEvent.class);
 
@@ -93,21 +87,102 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 
 	// Given a SurroundSoundFBEvent, it will try to save it to the DB
 	public static SurroundSoundFbEvent create(SurroundSoundFbEvent event) {
+		if (event==null) Logger.error("SurroundSoundFbEvent.create(): The given event is null!");
 		try {
 			event.save();
 			Logger.info("Event "+event.id+": "+event.name+" has been saved.");
 		} catch (PersistenceException e) {
 			// If saving fails, it will attempt an update on an existing one with the same id
-			Logger.info("I didn't save ["+event.id+": "+event.name+"] because it is probably already existing. I will try to update it now", e);
+			Logger.info("I didn't save ["+event.id+": "+event.name+"] because it is probably already existing. I will try to update it instead...");
 			try {
-				event.update();
+				SurroundSoundFbEvent oldEvent = SurroundSoundFbEvent.get(event.id);
+				if (oldEvent==null) Logger.error("SurroundSoundFbEvent.create(): I couldn't find the old event ["+event.id+"]: "+event.name);
+				else if (diff(oldEvent, event)) {
+					event.karma=oldEvent.karma;
+					event.update();
+					setUpdateFlag(event);
+				}
 			} catch (Exception e2) {
-				Logger.error("I couldn't update event ["+event.id+": "+event.name+"] ", e2);
+				Logger.error("I couldn't update event ["+event.id+"]: "+event.name+"] ", e2);
 			}
 		}
 		return event;
 	}
+	
+	// Refreshes the timeFlag of all the SourroundSoundFbEvent entities in the DB
+	public static void refreshAllTimeFlags(){
+		Iterator<SurroundSoundFbEvent> it = all().iterator();
+		while(it.hasNext()){
+			it.next().refreshTimeFlag();
+		}
+	}
 
+	// refreshes the timeFlag of this event
+	private void refreshTimeFlag() {
+		this.setTimeFlag();
+	}
+
+	// sets the event relative updated time flag; according to the given event's timeFlag 
+	private static void setUpdateFlag(SurroundSoundFbEvent event) {
+		String fl = event.timeFlag;
+		if (fl.equals("today")) SurroundSoundController.todayUpdated=true;
+		if (fl.equals("soon")) SurroundSoundController.soonUpdated=true;
+		else SurroundSoundController.pastUpdated=true;
+	}
+
+	// Sets the timeFlag of this event
+	private void setTimeFlag() {
+		this.timeFlag = computeTimeFlag(this.startTime);
+	}
+
+	// computes a timeFlag according to the given startTime
+	private static String computeTimeFlag(Calendar startTime) {
+		String timeFlag;
+		Calendar now = Calendar.getInstance();
+		int currentDay = now.get(Calendar.DAY_OF_MONTH);
+		int currentMonth = now.get(Calendar.MONTH);
+		int currentYear = now.get(Calendar.YEAR);
+		Logger.info("currentDay = "+currentDay+"; currentMonth = "+currentMonth+"; currentYear = "+currentYear);
+		
+		int eDay = startTime.get(Calendar.DAY_OF_MONTH);
+		int eMonth = startTime.get(Calendar.MONTH);
+		int eYear = startTime.get(Calendar.YEAR);
+		long timeInMillis = startTime.getTimeInMillis();
+		Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
+		startTime.setTimeInMillis(timeInMillis);
+
+		if (eYear<currentYear) timeFlag="past";
+		else if ((eYear==currentYear)&&(eMonth<currentMonth)) timeFlag="past";
+		else if ((eYear==currentYear)&&(eMonth==currentMonth)&&(eDay<currentDay)) timeFlag="past";
+		else if ((currentDay==eDay)&&(currentMonth==eMonth)&&(currentYear==eYear)) timeFlag="today";
+		else timeFlag="soon";
+		return timeFlag;
+	}
+
+	private static boolean diff(SurroundSoundFbEvent oldEvent,
+			SurroundSoundFbEvent newEvent) {
+		if ((oldEvent==null)||(newEvent==null)) Logger.error("SurroundSoundFbEvent.diff(): some input is null: oldEvent="+oldEvent+"; newEvent="+newEvent);
+		boolean sameCoverSource = newEvent.coverSource.equals(oldEvent.coverSource);
+		boolean sameDate = newEvent.date.equals(oldEvent.date);
+		boolean sameDescription = newEvent.description.equals(oldEvent.description);
+		boolean samePlace = newEvent.place.equals(oldEvent.place);
+		if (!samePlace) Logger.warn("SurroundSoundFbEvent.diff(): place has changed on event ["+oldEvent.id+"] "+oldEvent.name+" - !samePlace = "+!samePlace);
+		boolean sameName = newEvent.name.equals(oldEvent.name);
+		boolean sameUpdateTime = (oldEvent.updateTime==null)||(newEvent.updateTime.equals(oldEvent.updateTime));
+		return !sameCoverSource||!sameDate||!sameDescription||!samePlace||!sameName||!sameUpdateTime;
+	}
+	
+	public static List<SurroundSoundFbEvent> getByTimeTag(String flag){
+		ArrayList<SurroundSoundFbEvent> r = new ArrayList<SurroundSoundFbEvent>();
+		Iterator<SurroundSoundFbEvent> it = all().iterator();
+		while (it.hasNext()) {
+			SurroundSoundFbEvent e = it.next();
+			if (flag.equals(e.timeFlag)) r.add(e);
+		}
+		Collections.sort(r, new SurroundSoundFbEvent());
+		return r;
+	}
+	
 	public static List<SurroundSoundFbUser> initAttending(Long eventId){
 		Logger.info("\t>> Fetching data about people attending (might take some time)");
 		String s = String.valueOf(eventId);
@@ -140,8 +215,8 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 		Venue v = event.getVenue();
 		String loc = event.getLocation();
 		if (v!=null) this.place=v.toString();
-		else if (loc!=null) this.place=loc; 
-		else this.place="";
+		else if (loc!=null) this.place=loc;
+		else this.place="Lugano";
 
 		this.name = event.getName();
 		NamedFacebookType owner = event.getOwner();
@@ -150,8 +225,17 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 			this.ownerId = event.getOwner().getId();			
 		}
 		this.description = event.getDescription();
-		JsonObject jdescr = SurroundSoundController.FB_CLIENT.fetchObject(event.getId(), JsonObject.class, Parameter.with("fields", "description"));
-		this.description = jdescr.getString("description");
+		try {
+			JsonObject jdescr = SurroundSoundController.FB_CLIENT.fetchObject(event.getId(), JsonObject.class, Parameter.with("fields", "description"));
+			JsonObject whatWeGet = SurroundSoundController.FB_CLIENT.fetchObject(event.getId(), JsonObject.class);
+//			Logger.warn("jdescr: "+jdescr.toString());
+//			Logger.warn("whatWeGet: "+whatWeGet.toString());
+			this.description = jdescr.getString("description").replace("\n", "<br/>");
+			Logger.warn("SurroundSoundFbEvent("+pageId+", ["+event.getId()+"] "+event.getName()+")"+this.description);
+		} catch (Exception e) {
+			Logger.warn("I couldn't get the description of the event ["+event.getId()+"]"+event.getName(), e);
+			this.description = "No description available for this event...";
+		}
 		JsonNode jevent = Json.toJson(event);
 //		System.out.println("\tjevent.description: "+jevent.get("description"));
 		this.startTime = Calendar.getInstance();
@@ -176,6 +260,8 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 		JsonObject jheight = SurroundSoundController.FB_CLIENT.fetchObject(coverId, JsonObject.class, Parameter.with("fields", "height"));
 		this.coverOffset=(jheight.getLong("height")/100)*(new Long(this.coverOffsetY));
 		this.karma = 0;
+		this.setTimeFlag();
+		this.updateTime=event.getUpdatedTime();
 	}
 
 	private int getAttendance(Event event) {

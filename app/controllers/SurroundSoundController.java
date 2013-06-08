@@ -57,45 +57,49 @@ public class SurroundSoundController extends Controller {
 
 	public static final long REFRESH_RATE = 18000000; //18000000;// 3 minutes  // (In milliseconds)
 	public static String appName = "SurroundSound";
-    public static String wsAddress = "ws://pdnet.inf.unisi.ch:2222/SurroundSound/socket";
-    // public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
+    // public static String wsAddress = "ws://pdnet.inf.unisi.ch:2222/SurroundSound/socket";
+    public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
 	//display size: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
 	public static HashMap<String, Sockets> displaySockets = new HashMap<String, Sockets>();
 	public static HashMap<WebSocket.Out<JsonNode>, String> displaySocketReverter = new HashMap<WebSocket.Out<JsonNode>, String>();
 
+	public static Calendar lastPushToAllClients = Calendar.getInstance();
 	
 	public static FacebookClient FB_CLIENT;
 
-    // private static String[] pageNamesArr = {
-    //     "52722248335",
-    //     "88585210034",
-    //     "115823771813441",
-    //     "122909424460471",
-    //     "Acbess.GSV",
-    //     "aiesec.lugano",
-    //     "arteurbanalugano",
-    //     "baroopslugano",
-    //     "BeatCircusMusicFestival",
-    //     "classcafelugano",
-    //     "cluboneofficial",
-    //     "estivaljazz",
-    //     "estivalugano",
-    //     "foce.lugano",
-    //     "garagemusiccastione",
-    //         "lugano.buskers",
-    //     "lugano.bynight",
-    //     "lusti.org",
-    //     "milklugano",
-    //     "pastoraleuniversitaria.lugano",
-    //     "skiweekofficial",
-    //     "theoriginalslugano",
-    //     "usiuniversity",
-    //     "vivacafe.lugano",
-    //     "wkndlugano"
-    // };
+     private static String[] pageNamesArr = {
+         "52722248335",
+         "88585210034",
+         "115823771813441",
+         "122909424460471",
+         "Acbess.GSV",
+         "aiesec.lugano",
+         "arteurbanalugano",
+         "baroopslugano",
+         "BeatCircusMusicFestival",
+         "classcafelugano",
+         "cluboneofficial",
+         "estivaljazz",
+         "estivalugano",
+         "foce.lugano",
+         "garagemusiccastione",
+         "thejokershop",
+         "longlakefestival",
+         "lugano.buskers",
+         "lugano.bynight",
+         "lusti.org",
+         "milklugano",
+         "pastoraleuniversitaria.lugano",
+         "skiweekofficial",
+         "thedjmarathon",
+         "theoriginalslugano",
+         "usiuniversity",
+         "vivacafe.lugano",
+         "wkndlugano"
+     };
 	
-    // public static ArrayList<String> pageNames = new ArrayList<String>(Arrays.asList(pageNamesArr));
+     public static ArrayList<String> pageNames = new ArrayList<String>(Arrays.asList(pageNamesArr));
 	private static ArrayList<Long> pageIds = new ArrayList<Long>();
 	private static ArrayList<SurroundSoundFbPage> ssFbPages = new ArrayList<SurroundSoundFbPage>();
 	private static int lastCount = 0; 
@@ -106,7 +110,7 @@ public class SurroundSoundController extends Controller {
 
 	public static Result test(String displayID, String size) {
 		Result r = index(displayID, size);
-		push();
+//		pushToAllClients();
 		return r;
 	}
 
@@ -118,74 +122,56 @@ public class SurroundSoundController extends Controller {
 		return ok(views.html.surroundSound.render(displayID, wsAddress, size));
 	}
 
-	public static void update(){
+	public static void refresh(){
 		fetchEvents();
-		if (hasNewEvents()) push();
+		if (needsUpdate()){
+			pushToAllClients();
+		} else {
+			Logger.warn("No update needed???");
+		}
+//		if (hasNewEvents()) push();
 	}
 
-	public static void push() {
-		Logger.info("push()");
+	private static boolean needsUpdate() {
+		return (pastUpdated||todayUpdated||soonUpdated||hasNewEvents()||pushIsOld());
+	}
+
+	private static boolean pushIsOld() {
+		Calendar c = Calendar.getInstance();
+		return ((lastPushToAllClients.get(Calendar.YEAR)<c.get(Calendar.YEAR))
+				|| ((lastPushToAllClients.get(Calendar.YEAR)>=c.get(Calendar.YEAR))
+						&& (lastPushToAllClients.get(Calendar.MONTH)<c.get(Calendar.MONTH)))
+				|| ((lastPushToAllClients.get(Calendar.YEAR)>=c.get(Calendar.YEAR))
+						&& (lastPushToAllClients.get(Calendar.MONTH)>=c.get(Calendar.MONTH))
+						&& (lastPushToAllClients.get(Calendar.DAY_OF_YEAR)<c.get(Calendar.DAY_OF_MONTH))));
+	}
+
+	//	pushes an updated set of events to all the clients
+	public static void pushToAllClients() {
+		Logger.info("pushToAllClients()");
 		Set<Entry<String, Sockets>> es = displaySockets.entrySet();
 		Iterator<Entry<String, Sockets>> it = es.iterator();
 		while(it.hasNext()){
 			Entry<String, Sockets> e = it.next();
 			Logger.info("push(): s.getKey()="+e.getKey()+"; s.getValue()="+e.getValue());
 			Sockets s = e.getValue();
-			ObjectNode msg = Json.newObject();
+			ObjectNode msg = packFreshEvents();
+			msg.put("writtenBy", "pushToAllClients");
 //			msg.put("kind", "eventlist");
-			msg.put("kind", "update");
-			List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
-			Collections.sort(all, new SurroundSoundFbEvent());
-			JsonNode jall = Json.toJson(all);
-			msg.put("events", jall);
+//			msg.put("kind", "update");
+//			List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
+//			Collections.sort(all, new SurroundSoundFbEvent());
+//			JsonNode jall = Json.toJson(all);
+//			msg.put("events", jall);
 			s.wOut.write(msg);
 		}
+		lastPushToAllClients=Calendar.getInstance();
 	}
 	
-	public static void pushAll(Out<JsonNode> out, JsonNode event){
-		ObjectNode msg = Json.newObject();
-		msg.put("kind", "events");
-		List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
-		Collections.sort(all, new SurroundSoundFbEvent());
-		Iterator<SurroundSoundFbEvent> allit = all.iterator();
-		
-		Calendar filter = Calendar.getInstance();
-		int currentDay = filter.get(Calendar.DAY_OF_MONTH);
-		int currentMonth = filter.get(Calendar.MONTH);
-		int currentYear = filter.get(Calendar.YEAR);
-		Logger.info("currentDay = "+currentDay+"; currentMonth = "+currentMonth+"; currentYear = "+currentYear);
-		
-//		Date currentDate = new Date();
-		
-		List<SurroundSoundFbEvent> past = new ArrayList<SurroundSoundFbEvent>();
-		List<SurroundSoundFbEvent> today = new ArrayList<SurroundSoundFbEvent>();
-		List<SurroundSoundFbEvent> tomorrow = new ArrayList<SurroundSoundFbEvent>();
-		List<SurroundSoundFbEvent> soon = new ArrayList<SurroundSoundFbEvent>();
-
-		while (allit.hasNext()){
-			SurroundSoundFbEvent e = allit.next();
-			Calendar startTime = e.startTime;
-			int eDay = startTime.get(Calendar.DAY_OF_MONTH);
-			int eMonth = startTime.get(Calendar.MONTH);
-			int eYear = startTime.get(Calendar.YEAR);
-			long timeInMillis = startTime.getTimeInMillis();
-            Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
-			startTime.setTimeInMillis(timeInMillis);
-//			Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
-			if (eYear<currentYear) past.add(e);
-            else if ((eYear==currentYear)&&(eMonth<currentMonth)) past.add(e);
-            else if ((eYear==currentYear)&&(eMonth==currentMonth)&&(eDay<currentDay)) past.add(e);
-			else if ((currentDay==eDay)&&(currentMonth==eMonth)&&(currentYear==eYear)) today.add(e);
-            else soon.add(e);
-		}
-		JsonNode jPast = Json.toJson(past);
-		msg.put("past", jPast);
-		JsonNode jToday = Json.toJson(today);
-		msg.put("today", jToday);
-		JsonNode jTomorrow = Json.toJson(tomorrow);
-		msg.put("tomorrow", jTomorrow);
-		JsonNode jSoon = Json.toJson(soon);
-		msg.put("soon", jSoon);
+	//	pushes all the events to the given client
+	public static void pushEventsTo(Out<JsonNode> out, JsonNode event){
+//		resetUpdatesFlags();
+		ObjectNode msg = packFreshEvents();
 		out.write(msg);
 
 		String displayid = event.get("displayID").asText();
@@ -197,17 +183,90 @@ public class SurroundSoundController extends Controller {
 
 	}
 
+//	private static void resetUpdatesFlags() {
+//		pastUpdated=false;
+//		todayUpdated=false;
+//		soonUpdated=false;
+//	}
+
+	private static ObjectNode packFreshEvents() {
+		ObjectNode msg = Json.newObject();
+		msg.put("kind", "events");
+		List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
+		Collections.sort(all, new SurroundSoundFbEvent());
+		
+		Calendar filter = Calendar.getInstance();
+		int currentDay = filter.get(Calendar.DAY_OF_MONTH);
+		int currentMonth = filter.get(Calendar.MONTH);
+		int currentYear = filter.get(Calendar.YEAR);
+		Logger.info("currentDay = "+currentDay+"; currentMonth = "+currentMonth+"; currentYear = "+currentYear);
+		
+		List<SurroundSoundFbEvent> past = new ArrayList<SurroundSoundFbEvent>();
+		List<SurroundSoundFbEvent> today = new ArrayList<SurroundSoundFbEvent>();
+		List<SurroundSoundFbEvent> soon = new ArrayList<SurroundSoundFbEvent>();
+		if (pastUpdated){
+			past = SurroundSoundFbEvent.getByTimeTag("past");
+			pastUpdated=false;
+		} if (todayUpdated){
+			today = SurroundSoundFbEvent.getByTimeTag("today");
+			todayUpdated=false;
+		} if (soonUpdated){
+			soon = SurroundSoundFbEvent.getByTimeTag("soon");
+			soonUpdated=false;
+		}
+		msg.put("past", Json.toJson(past));
+		msg.put("today", Json.toJson(today));
+		msg.put("soon", Json.toJson(soon));
+		
+		return msg;
+
+//		Date currentDate = new Date();
+
+//		while (allit.hasNext()){
+//			SurroundSoundFbEvent e = allit.next();
+//			String fl = e.timeFlag;
+//			switch (fl) {
+//			case "today": today.add(e);
+//			case "soon": soon.add(e);
+//			default: past.add(e);
+//			}
+			
+//			Calendar startTime = e.startTime;
+			
+//			int eDay = startTime.get(Calendar.DAY_OF_MONTH);
+//			int eMonth = startTime.get(Calendar.MONTH);
+//			int eYear = startTime.get(Calendar.YEAR);
+//			long timeInMillis = startTime.getTimeInMillis();
+//            Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
+//			startTime.setTimeInMillis(timeInMillis);
+//			Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
+//			
+//			if (eYear<currentYear) past.add(e);
+//            else if ((eYear==currentYear)&&(eMonth<currentMonth)) past.add(e);
+//            else if ((eYear==currentYear)&&(eMonth==currentMonth)&&(eDay<currentDay)) past.add(e);
+//			else if ((currentDay==eDay)&&(currentMonth==eMonth)&&(currentYear==eYear)) today.add(e);
+//            else soon.add(e);
+//		}
+//		JsonNode jPast = Json.toJson(past);
+//		msg.put("past", jPast);
+//		JsonNode jToday = Json.toJson(today);
+//		msg.put("today", jToday);
+//		JsonNode jSoon = Json.toJson(soon);
+//		msg.put("soon", jSoon);
+//		return null;
+	}
+
 	private static boolean hasNewEvents() {
 		int n = SurroundSoundFbEvent.all().size();
 		boolean b = n>lastCount;
 		if (b) lastCount=n;
-//		return b;
-		return true;
+		return b;
+//		return true;
 	}
 
 	public static void startEventsScheduler(){
 		Logger.info("eventsScheduler() ---- START SCHEDULER ---");
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 20, TimeUnit.MINUTES);
+		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 10, TimeUnit.SECONDS);
 	}
 
 	//should end with the application
@@ -217,10 +276,14 @@ public class SurroundSoundController extends Controller {
 	}
 
 	public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	public static boolean SurroundSoundFbEventUpdate;
+	public static boolean todayUpdated = true;
+	public static boolean soonUpdated = true;
+	public static boolean pastUpdated = true;
 	final static Runnable beeper = new Runnable() {
 		public void run() { 
 			Logger.info("eventsScheduler(): checking for new events");
-			update();
+			refresh();
 		}
 	};
 
@@ -254,7 +317,7 @@ public class SurroundSoundController extends Controller {
 							Logger.info("********* GOT MESSAGE REQUEST for the events *********");
 							//							if(!displaySockets.containsKey(event.get("diplayID"))){
 							Logger.info(appName+".Socket(): new displayID="+event.get("displayID")+" size="+event.get("size"));
-							pushAll(out, event);
+							pushEventsTo(out, event);
 						}
 
 						if(messageKind.equals("eventlist")){
@@ -334,32 +397,29 @@ public class SurroundSoundController extends Controller {
 
 
 	public static void fetchEvents(){
-
 		Logger.info("Fetching events...");
-
-        // initPageIds();
+		initPageIds();
 		collectData();
-//		Logger.info("Page IDs"+pageIds);
 	}
 
-//     private static void initPageIds() {
-// //        Logger.info("initPageIds()");
-//         int l = pageNames.size();
-//         for (int i = 0; i < l; i++) {
-//             String pagename = pageNames.get(i);
-//             try {
-//                 Page page = FB_CLIENT.fetchObject(pagename, Page.class);
-//                 String idString = page.getId();
-//                 pageIds.add(new Long(idString));
-// //                Logger.info("\tgot "+pagename+"'s id: "+idString);
-//             } catch (FacebookOAuthException e) {
-//                 Logger.error("I couldn't get the ID of "+pagename,e);
-//                 Logger.info("We might need a new AccessToken! Please check its validity");
-// //                refreshAccessToken();
-//                 return;
-//             }
-//         }
-//     }
+     private static void initPageIds() {
+         Logger.info("initPageIds()");
+         int l = pageNames.size();
+         for (int i = 0; i < l; i++) {
+             String pagename = pageNames.get(i);
+             try {
+                 Page page = FB_CLIENT.fetchObject(pagename, Page.class);
+                 String idString = page.getId();
+                 pageIds.add(new Long(idString));
+                 Logger.info("\tgot "+pagename+"'s id: "+idString);
+             } catch (FacebookOAuthException e) {
+                 Logger.error("I couldn't get the ID of "+pagename,e);
+                 Logger.info("We might need a fresh AccessToken! Please check its validity");
+//                 refreshAccessToken();
+                 return;
+             }
+         }
+     }
 
 	// from http://stackoverflow.com/questions/1485708/how-do-i-do-a-http-get-in-java
 //	private static void refreshAccessToken() {
@@ -385,12 +445,18 @@ public class SurroundSoundController extends Controller {
 	}
 
 	public static void init() {
+		String at = "";
 		try {
-			String at = AppData.get(new Long(1)).accessToken;
-			FB_CLIENT= new DefaultFacebookClient(at);
+			Logger.warn(AppData.all().toString());
+			at = AppData.get(new Long(1)).accessToken;
 		} catch (Exception e) {
 			Logger.error("Can't initialize a DefaultFacebookClient",e);
 			Logger.warn("Please check the presence of the access token in the DB");
+		}
+		try {
+			FB_CLIENT= new DefaultFacebookClient(at);
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 		startEventsScheduler();
 	}

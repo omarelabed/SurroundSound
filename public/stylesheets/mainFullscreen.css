@@ -17,6 +17,7 @@ header {
 
 h1 {
     margin: 0px;
+    padding-right: 6px;
 }
 
 .time {
@@ -177,7 +178,7 @@ body {
     max-width:940px;
 }
 #lightbox_content {
-    margin-top: 200px;
+/*    margin-top: 200px;*/
     background:white;
     table-layout:fixed;
 }
@@ -261,9 +262,11 @@ span {
 
 /* DETAILS */
 .details_content {
+/*    overflow-x:hidden;*/
     float:left;
     color: white;
-    max-width: 714px;
+    max-width: 600px;
+/*    max-height: 300px;*/
 /*    margin-right: 200px;*/
     margin: 20px;
 }
@@ -274,10 +277,18 @@ span {
 }
 
 #moreDetails{
-    float:right;
-    width: 714px;
+/*    float:right;*/
+    width: 600px;
+}
+
+#details_imgbox img{
+    width: 600px;
 }
 
 #moreDetailsContent {
-    min-height: 714px;
+    min-height: 600px;
+}
+
+.detailsTitle{
+    size:5em;
 }

@@ -57,6 +57,7 @@ create table surround_sound_fb_event (
   place                     varchar(255),
   link                      varchar(255),
   karma                     integer,
+  time_flag                 varchar(255),
   constraint pk_surround_sound_fb_event primary key (id))
 ;
 

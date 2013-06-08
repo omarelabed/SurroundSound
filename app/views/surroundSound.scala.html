@@ -183,7 +183,7 @@
     }
     
 
-    var countDownTime = 5; // default: 20
+    var countDownTime = 20; // default: 20
     var timer = 0;
     var isHome = true;
     var detailsClosed=true;
@@ -230,13 +230,17 @@
     // IMPORTANT the row var has to be initialized outside of this method (see above)
     function addToAgenda(e, id){
         monitor('addToAgenda('+e+', '+id+')', e.name);
+        var td = $('#box_'+e.id);
+        var isNew = td.length<=0;
+        if (isNew){
+            td = $('<td></td>').attr({
+                'valign':'top',
+                'id':'box_'+e.id
+            });
+        }
         var box = $('<div class="event_box"></div>').attr({
             // 'class':'event_box',
             'id':e.id
-        });
-        var td = $('<td></td>').attr({
-            'valign':'top',
-            'id':'box_'+e.id
         });
         // cover
         var coverspan = $('<span></span>');
@@ -256,7 +260,7 @@
         });
         // info
         var infodiv = $('<div class="info"></div>');
-        var whendiv = $('<div class="when"></div>').text(e.day+', '+e.date+', '+e.time);
+        var whendiv = $('<div class="when"></div>').text(e.day+' | '+e.date+' | '+e.time);
         var wherediv = $('<div class="where"></div>').text(e.place);
         var nameString = e.name;
         if (nameString.length>60){
@@ -417,30 +421,6 @@
         console.log('END goHome(): $(window).scrollLeft(): '+$('#agenda').scrollLeft());
     }
 
-
-    // $('#logo').live('click', function () {
-    //     // alert('just clicked on the logo! will you scroll to '+'#'+nextEvent+'??');
-    //     
-    //     var offset = $('#'+nextEvent).offset();
-    //     $('html, body').animate({
-    //         scrollLeft: offset.left
-    //     });
-    // })
-    // 
-    // $('#loader').live('click', function() {
-    //     alert('click??');
-    //     $('#loader').hide();
-    // })
-    // 
-    // $().ready(function() {
-    //     var $scrollingDiv = $("#scrollingDiv");
-    // 
-    //     $(window).scroll(function(){
-    //         $scrollingDiv.stop().animate({
-    //             "marginLeft": ($(window).scrollLeft() + ($(window).width()/2)) + "px"
-    //         }, "fast" );
-    //     });
-    // });
     function createLightbox(){
         var lightbox = $('<div></div>').attr('id', 'lightbox');
         var close = $('<img/>').attr({
@@ -455,6 +435,7 @@
         lightbox.append(lbContent);
         $('body').append(lightbox);
         close.bind('click', function(){
+            resetTimer();
             lightbox.hide('slow');
             detailsClosed = true;
             goHome();
@@ -483,7 +464,6 @@
         // date = e.date;
         // time = e.time;
         // day = e.day;
-        console.log('TODO: define a function that creates lightbox content for');
         console.log(e);
         
         // the main container of the details
@@ -513,8 +493,8 @@
         // var infoHeader = $('<div></div>').attr({
         //     'id':'details_infoheader'
         // });
-        var eventName = $('<h1></h1>').text(e.name);
-        var eventDate = $('<h1></h1>').text(e.day+' '+e.date+', '+e.time);
+        var eventName = $('<h1 class="detailsTitle"></h1>').text(e.name);
+        var eventDate = $('<h1></h1>').text(e.day+' '+e.date+' | '+e.time);
         var eventLocation = $('<h1></h1>').text(e.place);
         maininfobox.append(eventName,eventDate,eventLocation);
         // update mainbox
@@ -540,7 +520,7 @@
         // content 1: description
         var eventDescription = $('<p></p>').attr({
             'id':'eventDescription'
-        }).text(e.description);
+        }).html(e.description);
         // content 2: map
         // var map = $('<div></div>').attr({
         //     'id':'map'
@@ -566,7 +546,7 @@
         
         // "more details" tabs
         //      description tab
-        var descriptionTab = $('<a></a>').text('Description | ').attr({
+        var descriptionTab = $('<a></a>').text('Description').attr({
             'id':'descriptionTab',
             'class':'detailsTab'
         }).bind('click', function(){
@@ -582,8 +562,8 @@
             moreDetailsContent.html(map);
             mapTab.css('color','white');
             descriptionTab.css('color','grey');
-        });
-        moreDetailsTabs.append(descriptionTab,mapTab);
+        }).css('color','grey');
+        moreDetailsTabs.append(descriptionTab,' | ',mapTab);
         
         // default "more details" content
         moreDetailsContent.html(eventDescription);
@@ -606,8 +586,11 @@
         if (lastLightbox!=id){
             var e = eventsCollection['event_'+id];
             var details = makeDetails(e);
+            var m = ($('header').height()*2)+'px';
             console.log(details);
-            $('#lightbox_content').html(details);
+            $('#lightbox_content').html(details).css({
+                'margin': m,
+            });
         }
         showLightbox();
     }
