@@ -500,7 +500,7 @@
         // });
         var eventName = $('<h1 class="detailsTitle"></h1>').text(e.name);
         var eventDate = $('<h1></h1>').text(e.day+' '+e.date+' | '+e.time);
-        var eventLocation = $('<h1></h1>').text(e.place);
+        var eventLocation = $('<h3></h3>').text(e.place);
         maininfobox.append(eventName,eventDate,eventLocation);
         // update mainbox
         mainbox.append(maininfobox);

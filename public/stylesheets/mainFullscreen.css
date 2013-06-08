@@ -283,8 +283,12 @@ span {
 .detailsTitle{
     font-size:200%;
 }
+#details_imgbox{
+    margin-bottom: 1080px;
+}
 #details_infobox{
     max-width:600px;
+    margin-bottom: 48px;
 }
 #moreDetails{
 /*    float:right;*/
