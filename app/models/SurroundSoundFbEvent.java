@@ -87,7 +87,7 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 
 	// Given a SurroundSoundFBEvent, it will try to save it to the DB
 	public static SurroundSoundFbEvent create(SurroundSoundFbEvent event) {
-		if (event==null) Logger.error("SurroundSoundFbEvent.create(): The given event is null!");
+		if (event==null) Logger.warn("SurroundSoundFbEvent.create(): The given event is null!");
 		try {
 			event.save();
 			Logger.info("Event "+event.id+": "+event.name+" has been saved.");
@@ -96,14 +96,14 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 			Logger.info("I didn't save ["+event.id+": "+event.name+"] because it is probably already existing. I will try to update it instead...");
 			try {
 				SurroundSoundFbEvent oldEvent = SurroundSoundFbEvent.get(event.id);
-				if (oldEvent==null) Logger.error("SurroundSoundFbEvent.create(): I couldn't find the old event ["+event.id+"]: "+event.name);
+				if (oldEvent==null) Logger.warn("SurroundSoundFbEvent.create(): I couldn't find the old event ["+event.id+"]: "+event.name);
 				else if (diff(oldEvent, event)) {
 					event.karma=oldEvent.karma;
 					event.update();
 					setUpdateFlag(event);
 				}
 			} catch (Exception e2) {
-				Logger.error("I couldn't update event ["+event.id+"]: "+event.name+"] ", e2);
+				Logger.warn("I couldn't update event ["+event.id+"]: "+event.name+"] ");
 			}
 		}
 		return event;
@@ -161,7 +161,7 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 
 	private static boolean diff(SurroundSoundFbEvent oldEvent,
 			SurroundSoundFbEvent newEvent) {
-		if ((oldEvent==null)||(newEvent==null)) Logger.error("SurroundSoundFbEvent.diff(): some input is null: oldEvent="+oldEvent+"; newEvent="+newEvent);
+		if ((oldEvent==null)||(newEvent==null)) Logger.warn("SurroundSoundFbEvent.diff(): some input is null: oldEvent="+oldEvent+"; newEvent="+newEvent);
 		boolean sameCoverSource = newEvent.coverSource.equals(oldEvent.coverSource);
 		boolean sameDate = newEvent.date.equals(oldEvent.date);
 		boolean sameDescription = newEvent.description.equals(oldEvent.description);

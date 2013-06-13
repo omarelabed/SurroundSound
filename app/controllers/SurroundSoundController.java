@@ -89,7 +89,7 @@ public class SurroundSoundController extends Controller {
          "luniversoOFFICIAL",
          "lusti.org",
          "milklugano",
-         "pastoraleuniversitaria.lugano",
+//         "pastoraleuniversitaria.lugano",
          "thedjmarathon",
          "theoriginalslugano",
          "usiuniversity",
@@ -411,8 +411,8 @@ public class SurroundSoundController extends Controller {
                  pageIds.add(new Long(idString));
                  Logger.info("\tgot "+pagename+"'s id: "+idString);
              } catch (FacebookOAuthException e) {
-                 Logger.error("I couldn't get the ID of "+pagename,e);
-                 Logger.info("We might need a fresh AccessToken! Please check its validity");
+//                 Logger.error("I couldn't get the ID of "+pagename,e);
+                 Logger.warn("We might need a fresh AccessToken! Please check its validity");
 //                 refreshAccessToken();
                  return;
              }

@@ -179,12 +179,12 @@ public class SurroundSoundFbPage extends Model {
 			// Fetch all the events of this page
 			fetchEvents(this.id);
 		} catch (Exception e) {
-			Logger.error("SurroundSoundFbPage(): couldn't instantiate on page ["+page.getId()+"] "+page.getName(),e);
+			Logger.warn("SurroundSoundFbPage(): couldn't instantiate on page ["+page.getId()+"] "+page.getName());
 		}
 	}
 
 	private void fetchEvents(Long pageId) {
-		if (pageId==null) Logger.error("SurroundSoundFbPage.fetchEvents(): pageId="+pageId);
+		if (pageId==null) Logger.warn("SurroundSoundFbPage.fetchEvents(): pageId="+pageId);
 		Logger.info("**** fetchEvents("+pageId+")");
 		String s = String.valueOf(pageId);
 		Connection<Event> eventConn = SurroundSoundController.FB_CLIENT.fetchConnection(s+"/events", Event.class);
@@ -195,7 +195,7 @@ public class SurroundSoundFbPage extends Model {
 //			Logger.info("**** ("+pageId+") CONNECTION: "+connection);
 			if (connection.size()>0){
 				Event event = connection.get(0);
-				if (event==null) Logger.error("fetchEvents("+pageId+") in event is null:"+event+"\n\t full set of connections:"+connection);
+				if (event==null) Logger.warn("fetchEvents("+pageId+") in event is null:"+event+"\n\t full set of connections:"+connection);
 				else SurroundSoundFbEvent.create(new SurroundSoundFbEvent(pageId, event));
 //				Logger.info("**** ("+pageId+") Connection 0: "+event.toString());
 			}
