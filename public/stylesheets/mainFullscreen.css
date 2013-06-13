@@ -4,6 +4,7 @@
 body {
     -moz-user-select: none;
     -webkit-user-select: none;
+    cursor:none;
 }
 
 header {
@@ -56,7 +57,7 @@ table {
 }
 */
 .row0, .row1 {
-    height: 480px;
+    height: 488px;
 }
 
 td.leftlined {
