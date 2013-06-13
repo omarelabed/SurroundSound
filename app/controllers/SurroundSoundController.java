@@ -377,7 +377,7 @@ public class SurroundSoundController extends Controller {
 						displaySocketReverter.remove(out);
 						displaySockets.remove(displayID);
 						AppLogger.addNew(new AppLogger(appName, "displayDisconect", new Date().toString(),"", displayID));
-						Logger.info(appName+".Socket(): display "+displayID+" is disconnected; number of connected displays: "+displaySockets.size());
+						Logger.info(appName+".Socket(): display "+displayID+" is disconnected");// number of connected displays: "+displaySockets.size());
 					}
 				});
 			}
