@@ -198,8 +198,8 @@
     function resetTimer(){
         timer=0;
     }
-    $(document).bind("mousemove scroll click keydown keyup", react);
-    $(window).bind("keydown", react);
+    $(document).bind("scroll click keydown keyup", react);
+    $(window).bind("keydown mousemove", react);
     $(window).css({
         'cursor' : 'none'
     });
