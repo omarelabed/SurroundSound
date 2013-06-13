@@ -641,7 +641,6 @@
     // source: http://jqueryfordesigners.com/demo/scrollable-timelines.html
     $(document).ready(function () {        
         $('#agenda').mousedown(function (event) {
-            react();
             $(this)
                 .data('down', true)
                 .data('x', event.clientX)
@@ -656,7 +655,6 @@
                 this.scrollLeft = $(this).data('scrollLeft') + $(this).data('x') - event.clientX;
             }
         }).mousewheel(function (event, delta) {
-            react();
             this.scrollLeft -= (delta * 30);
         }).css({
             'overflow' : 'hidden',
