@@ -57,8 +57,8 @@ public class SurroundSoundController extends Controller {
 
 	public static final long REFRESH_RATE = 18000000; //18000000;// 3 minutes  // (In milliseconds)
 	public static String appName = "SurroundSound";
-    public static String wsAddress = "ws://pdnet.inf.unisi.ch:2222/SurroundSound/socket";
-    // public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
+     public static String wsAddress = "ws://pdnet.inf.unisi.ch:2222/SurroundSound/socket";
+//    public static String wsAddress = "ws://localhost:9000/SurroundSound/socket";
 	//display size: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
 	public static HashMap<String, Sockets> displaySockets = new HashMap<String, Sockets>();
@@ -77,21 +77,19 @@ public class SurroundSoundController extends Controller {
          "aiesec.lugano",
          "arteurbanalugano",
          "baroopslugano",
-         "BeatCircusMusicFestival",
          "classcafelugano",
          "cluboneofficial",
          "estivaljazz",
          "estivalugano",
          "foce.lugano",
-         "garagemusiccastione",
          "thejokershop",
          "longlakefestival",
          "lugano.buskers",
          "lugano.bynight",
+         "luniversoOFFICIAL",
          "lusti.org",
          "milklugano",
          "pastoraleuniversitaria.lugano",
-         "skiweekofficial",
          "thedjmarathon",
          "theoriginalslugano",
          "usiuniversity",
@@ -266,7 +264,7 @@ public class SurroundSoundController extends Controller {
 
 	public static void startEventsScheduler(){
 		Logger.info("eventsScheduler() ---- START SCHEDULER ---");
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 2, TimeUnit.MINUTES);
+		final ScheduledFuture<?> refreshHandler = scheduler.scheduleAtFixedRate(refresher, 5, 10, TimeUnit.MINUTES);
 	}
 
 	//should end with the application
@@ -280,8 +278,8 @@ public class SurroundSoundController extends Controller {
 	public static boolean todayUpdated = true;
 	public static boolean soonUpdated = true;
 	public static boolean pastUpdated = true;
-	final static Runnable beeper = new Runnable() {
-		public void run() { 
+	final static Runnable refresher = new Runnable() {
+		public void run() {
 			Logger.info("eventsScheduler(): checking for new events");
 			refresh();
 		}

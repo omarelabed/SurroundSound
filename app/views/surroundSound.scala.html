@@ -104,6 +104,7 @@
         });
         websocket.send(hi);
         monitor('sent hi', '');
+        console.log(hi.toString());
         $("#agenda").hide();
         $("#loader").show();
     }
@@ -253,18 +254,23 @@
         box.html(coverspan);
         var coverdiv = $('<div class="coverImage" style="position:relative">');
         coverspan.html(coverdiv);
+        var more = $('<img class="more" src="@routes.Assets.at("images/plus.gif")" width="40" alt="Plus">').attr({'value': e.id}).css({'float':'right','z-index':'1000', 'margin-right':'33px'});
+        
         var coverimg = $('<img></img>').attr({
             "alt":"Discover events with SurroundSound!",
             "src":e.coverSource
         });
-        coverdiv.html(coverimg);
-        var more = $('<img></img>').attr({
-            'class':'more',
-            'src': "@routes.Assets.at("images/plus.gif")",
-            'alt': '+',
-            'height': "20px"
-        });
+        
+        coverdiv.append(coverimg);
+        
+        // var more = $('<img></img>').attr({
+        //     'class':'more',
+        //     'src': "@routes.Assets.at("images/plus.gif")",
+        //     'alt': '+',
+        //     'height': "20px"
+        // });
         // info
+        var morediv = $('<div top="-40px" class="more"></div>').append(more).css('opacity', '50%');
         var infodiv = $('<div class="info"></div>');
         var whendiv = $('<div class="when"></div>').text(e.day+' | '+e.date+' | '+e.time);
         var wherediv = $('<div class="where"></div>').html($('<h2></h2>')).text(e.place);
@@ -277,7 +283,7 @@
         // // infodiv.append(whendiv, wherediv, namediv, more);
         infodiv.append(whendiv, wherediv, namediv);
         // alert(infodiv.html());
-        box.append(infodiv);
+        box.append(more, infodiv);
         td.html(box);
         // alert(td.html());
         $('#row'+row+'_'+id).append(td);
@@ -396,7 +402,7 @@
     
     
     function goTo(offset){
-        var w = $('#soon_view').width();
+        var w = $('#soon_view').width()+$('#today_view').width();
         monitor('agenda_table width: ', w);
         var t = w*5;
         monitor('t = ', t);
@@ -605,13 +611,21 @@
     function setUpPage(){
         var x = $('#agenda_table').width();
         // monitor('x = ',x);
-        $('.event_box').bind("click", function(e){
+        // $('.event_box').bind("click", function(e){
+        //     // console.log(e);
+        //     var id = $(this).attr('id');
+        //     monitor('showDetails request for',id);
+        //     
+        //     showDetails(id);
+        // });
+        $('.more').bind("click", function(e){
             // console.log(e);
-            var id = $(this).attr('id');
+            var id = $(this).attr('value');
             monitor('showDetails request for',id);
             
             showDetails(id);
         });
+        
         $('html, #agenda').scrollLeft(x);
         goHome();
         console.log(eventsCollection);
@@ -623,6 +637,40 @@
     //   // $('.pep.y').pep({ axis: 'y', debug: true });
     //   // $('.pep.noease').pep({ axis: 'y', shouldEase: false, debug: true });
     // });
+    
+    // source: http://jqueryfordesigners.com/demo/scrollable-timelines.html
+    $(document).ready(function () {        
+        $('#agenda').mousedown(function (event) {
+            $(this)
+                .data('down', true)
+                .data('x', event.clientX)
+                .data('scrollLeft', this.scrollLeft);
+                
+            return false;
+        }).mouseup(function (event) {
+            $(this).data('down', false);
+        }).mousemove(function (event) {
+            if ($(this).data('down') == true) {
+                this.scrollLeft = $(this).data('scrollLeft') + $(this).data('x') - event.clientX;
+            }
+        }).mousewheel(function (event, delta) {
+            this.scrollLeft -= (delta * 30);
+        }).css({
+            'overflow' : 'hidden',
+            'cursor' : '-moz-grab'
+        });
+    });
+    
+    $(window).mouseout(function (event) {
+        if ($('#agenda').data('down')) {
+            try {
+                if (event.originalTarget.nodeName == 'BODY' || event.originalTarget.nodeName == 'HTML') {
+                    $('#agenda').data('down', false);
+                }                
+            } catch (e) {}
+        }
+    });
+
     
 
     </script>
