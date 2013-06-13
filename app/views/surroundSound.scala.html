@@ -650,7 +650,7 @@
         }).mouseup(function (event) {
             $(this).data('down', false);
         }).mousemove(function (event) {
-            react();
+            // react();
             if ($(this).data('down') == true) {
                 this.scrollLeft = $(this).data('scrollLeft') + $(this).data('x') - event.clientX;
             }
