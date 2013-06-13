@@ -199,7 +199,7 @@
         timer=0;
     }
     $(document).bind("scroll click keydown keyup", react);
-    $(window).bind("keydown mousemove", react);
+    $(window).bind("keydown", react);
     $(window).css({
         'cursor' : 'none'
     });
@@ -641,6 +641,7 @@
     // source: http://jqueryfordesigners.com/demo/scrollable-timelines.html
     $(document).ready(function () {        
         $('#agenda').mousedown(function (event) {
+            react();
             $(this)
                 .data('down', true)
                 .data('x', event.clientX)
@@ -650,7 +651,6 @@
         }).mouseup(function (event) {
             $(this).data('down', false);
         }).mousemove(function (event) {
-            // react();
             if ($(this).data('down') == true) {
                 this.scrollLeft = $(this).data('scrollLeft') + $(this).data('x') - event.clientX;
             }
