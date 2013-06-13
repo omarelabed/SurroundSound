@@ -640,7 +640,6 @@
     
     // source: http://jqueryfordesigners.com/demo/scrollable-timelines.html
     $(document).ready(function () {        
-        react();
         $('#agenda').mousedown(function (event) {
             react();
             $(this)
@@ -650,7 +649,6 @@
                 
             return false;
         }).mouseup(function (event) {
-            react();
             $(this).data('down', false);
         }).mousemove(function (event) {
             react();
