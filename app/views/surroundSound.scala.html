@@ -254,7 +254,7 @@
         box.html(coverspan);
         var coverdiv = $('<div class="coverImage" style="position:relative">');
         coverspan.html(coverdiv);
-        var more = $('<img class="more" src="@routes.Assets.at("images/plus.gif")" width="40" alt="Plus">').attr({'value': e.id}).css({'float':'right','z-index':'1000', 'margin-right':'33px'});
+        var more = $('<img class="more" src="@routes.Assets.at("images/plus.gif")" width="80" alt="Plus">').attr({'value': e.id}).css({'float':'right','z-index':'1000', 'margin-right':'0px'});
         
         var coverimg = $('<img></img>').attr({
             "alt":"Discover events with SurroundSound!",
@@ -433,8 +433,18 @@
         console.log('END goHome(): $(window).scrollLeft(): '+$('#agenda').scrollLeft());
     }
 
+    function closeLightbox(evt){
+        console.log('>>>>> closing details <<<<<');
+        $('#lightbox').hide('slow');
+        detailsClosed = true;
+        goHome();
+        resetTimer();
+    }
+
     function createLightbox(){
-        var lightbox = $('<div></div>').attr('id', 'lightbox');
+        var lightbox = $('<div></div>').attr('id', 'lightbox').css({
+            'margin-top':($('header').height()*2)+'px'
+        });
         var close = $('<img/>').attr({
             'id':'close',
             'src':"@routes.Assets.at("images/close.jpg")",
@@ -442,16 +452,18 @@
         }).css({
             'margin-top':$('header').height()+'px'
         });
-        lightbox.html(close);
+        // lightbox.html(close);
         var lbContent = $('<div></div>').attr('id', 'lightbox_content');
         lightbox.append(lbContent);
         $('body').append(lightbox);
-        close.bind('click', function(){
-            resetTimer();
-            lightbox.hide('slow');
-            detailsClosed = true;
-            goHome();
+        lightbox.bind('click', function(evt){
+            if (evt.target==lightbox[0]) {
+                closeLightbox();
+            }
         })
+        // Footer
+        var footer = $('<div id="footer"></div>').text('close').bind('click', closeLightbox);
+        lightbox.append(footer);
     }
     
     var lastLightbox;
@@ -507,11 +519,10 @@
         // });
         var eventName = $('<h1 class="detailsTitle"></h1>').text(e.name);
         var eventDate = $('<h1></h1>').text(e.day+' '+e.date+' | '+e.time);
-        var eventLocation = $('<h3></h3>').text(e.place);
+        var eventLocation = $('<h2></h2>').text(e.place);
         maininfobox.append(eventName,eventDate,eventLocation);
         // update mainbox
         mainbox.append(maininfobox);
-        
         // "more deails" box
         var moreDetails = $('<div></div>').attr({
             'id':'moreDetails',
@@ -563,7 +574,7 @@
             'class':'detailsTab'
         }).bind('click', function(){
             moreDetailsContent.html(eventDescription);
-            descriptionTab.css('color','white');
+            descriptionTab.css('color','black');
             mapTab.css('color','grey');
         });
         //      map tab
@@ -572,7 +583,7 @@
             'class':'detailsTab'
         }).bind('click', function(){
             moreDetailsContent.html(map);
-            mapTab.css('color','white');
+            mapTab.css('color','black');
             descriptionTab.css('color','grey');
         }).css('color','grey');
         moreDetailsTabs.append(descriptionTab,' | ',mapTab);
@@ -585,6 +596,7 @@
         // console.log('poster.css(\'width\'): '+poster.css('width'));
         // descriptionbox.css('width',poster.css('width')+'px');
         // var temp = $('#'+e.id).clone();
+        
         return mainbox;
     }
     

@@ -4,7 +4,7 @@
 body {
     -moz-user-select: none;
     -webkit-user-select: none;
-    cursor:none;
+/*    cursor:none;*/
 }
 
 header {
@@ -171,9 +171,9 @@ body {
     background:url(../images/overlay.png) repeat;
 /*    text-align:left;*/
 }
-#lightbox p {
+#moreDetailsContent {
 /*    text-align:right;*/
-    color:#fff;
+/*    color:#fff;*/
 /*    margin-right:20px;*/
 /*    font-size:12px;*/
 }
@@ -189,10 +189,22 @@ body {
     table-layout:fixed;
 }
 
+#lightbox_content a, p {
+    font-size:166%;
+}
+
 #close {
 /*    float:right;*/
     z-index:10000;
 }
+
+#footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color:gray;
+}
+
 /*
 #lightbox_content table {
     table-layout:fixed;
@@ -268,9 +280,10 @@ span {
 
 /* DETAILS */
 .details_content {
+    size: 2em;
 /*    overflow-x:hidden;*/
     float:left;
-    color: white;
+/*    color: white;*/
     max-width: 600px;
 /*    max-height: 300px;*/
 /*    margin-right: 200px;*/

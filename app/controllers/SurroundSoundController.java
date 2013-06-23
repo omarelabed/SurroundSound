@@ -69,15 +69,15 @@ public class SurroundSoundController extends Controller {
 	public static FacebookClient FB_CLIENT;
 
      private static String[] pageNamesArr = {
-         "52722248335",
-         "88585210034",
-         "115823771813441",
-         "122909424460471",
+         "52722248335", // Living Room
+         "88585210034", // LIDO Lugano 
+//         "115823771813441", // NYX - Lugano
+//         "122909424460471", // Caffe' Portici - Lugano
          "Acbess.GSV",
          "aiesec.lugano",
          "arteurbanalugano",
          "baroopslugano",
-         "classcafelugano",
+//         "classcafelugano",
          "cluboneofficial",
          "estivaljazz",
          "estivalugano",
@@ -93,7 +93,7 @@ public class SurroundSoundController extends Controller {
          "thedjmarathon",
          "theoriginalslugano",
          "usiuniversity",
-         "vivacafe.lugano",
+//         "vivacafe.lugano",
          "wkndlugano"
      };
 	
