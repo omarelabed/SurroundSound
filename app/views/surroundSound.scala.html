@@ -256,14 +256,14 @@
         coverspan.html(coverdiv);
         var more = $('<img class="more" src="@routes.Assets.at("images/plus.gif")" width="80" alt="Plus">').attr({'value': e.id}).css({'float':'right','z-index':'1000', 'margin-right':'0px'});
         
-        var coverimg = $('<img></img>').attr({
+        var coverimg = $('<img>').attr({
             "alt":"Discover events with SurroundSound!",
             "src":e.coverSource
         });
         
         coverdiv.append(coverimg);
         
-        // var more = $('<img></img>').attr({
+        // var more = $('<img>').attr({
         //     'class':'more',
         //     'src': "@routes.Assets.at("images/plus.gif")",
         //     'alt': '+',
@@ -302,7 +302,7 @@
             'class':'eventDetails',
             'id':'details_'+e.id
         });
-        var detailsImage = $('<img/>').attr({
+        var detailsImage = $('<img>').attr({
             'src':e.coverSource,
             'alt':alt
         });
@@ -347,14 +347,14 @@
         // var infodiv = $()
         // var det1_info = $('<td></td>').html(infodiv.clone());
         // var det2_map = $('<td></td>').html(map);
-        // var volup = $('<img/>').attr({
+        // var volup = $('<img>').attr({
         //     'class': 'volup',
         //     'src': "@routes.Assets.at("images/volup.png")",
         //     'alt': ':)',
         //     'height': "20px"
         // });
         // // monitor('volup = ', volup);
-        // var voldown = $('<img/>').attr({
+        // var voldown = $('<img>').attr({
         //     'class': 'voldown',
         //     'src': "@routes.Assets.at("images/voldown.png")",
         //     'alt': ':(',
@@ -445,14 +445,6 @@
         var lightbox = $('<div></div>').attr('id', 'lightbox').css({
             'margin-top':($('header').height()*2)+'px'
         });
-        var close = $('<img/>').attr({
-            'id':'close',
-            'src':"@routes.Assets.at("images/close.jpg")",
-            'alt':'close'
-        }).css({
-            'margin-top':$('header').height()+'px'
-        });
-        // lightbox.html(close);
         var lbContent = $('<div></div>').attr('id', 'lightbox_content');
         lightbox.append(lbContent);
         $('body').append(lightbox);
@@ -462,8 +454,8 @@
             }
         })
         // Footer
-        var footer = $('<div id="footer"></div>').text('close').bind('click', closeLightbox);
-        lightbox.append(footer);
+        // var footer = $('<div id="footer"></div>').text('close').bind('click', closeLightbox);
+        // lightbox.append(footer);
     }
     
     var lastLightbox;
@@ -500,7 +492,7 @@
             'id':'details_imgbox',
             'class':'details_content'
         });
-        var poster = $('<img/>').attr({
+        var poster = $('<img>').attr({
             'src':e.coverSource,
             'alt':e.name
         });
@@ -539,6 +531,27 @@
             'id':'moreDetailsContent'
         });
         moreDetails.append(moreDetailsContent);
+        
+        // var close = $('<img>').attr({
+        //     'id':'close',
+        //     'src':"@routes.Assets.at("images/minus.png")",
+        //     'alt':'close',
+        //     'width':'80px'
+        // }).css({
+        //     'margin-top':$('header').height()+'px',
+        //     'float':'right'
+        // }).bind('click', closeLightbox);
+        
+        var close = $('<div></div>').attr({
+            'id':'close'
+        }).css({
+            // 'margin-top':$('header').height()+'px',
+            'float':'right',
+            'border-bottom':'solid 15px',
+            'width': '45px'
+        }).bind('click', closeLightbox);
+        
+        moreDetails.append(close);
         
         // content 1: description
         var eventDescription = $('<p></p>').attr({
@@ -586,7 +599,7 @@
             mapTab.css('color','black');
             descriptionTab.css('color','grey');
         }).css('color','grey');
-        moreDetailsTabs.append(descriptionTab,' | ',mapTab);
+        moreDetailsTabs.append(descriptionTab,'<a> | </a>',mapTab);
         
         // default "more details" content
         moreDetailsContent.html(eventDescription);

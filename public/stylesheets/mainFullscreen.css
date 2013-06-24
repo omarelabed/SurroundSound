@@ -158,9 +158,9 @@ body {
     border-radius:0 0 5px 5px;
     -moz-border-radius:0 0 5px 5px;
     -webkit-border-radius: 0 0 5px 5px;
-    box-shadow:0 0 5px #ccc;
-    -moz-box-shadow:0 0 5px #ccc;
-    -webkit-box-shadow:0 0 5px #ccc;
+/*    box-shadow:0 0 5px #ccc;*/
+/*    -moz-box-shadow:0 0 5px #ccc;*/
+/*    -webkit-box-shadow:0 0 5px #ccc;*/
 }
 #lightbox {
     position:fixed; /* keeps the lightbox window in the current viewport */
@@ -179,8 +179,8 @@ body {
 }
 #lightbox img {
 /*    box-shadow:0 0 25px #111;*/
-    -webkit-box-shadow:0 0 25px #111;
-    -moz-box-shadow:0 0 25px #111;
+/*    -webkit-box-shadow:0 0 25px #111;*/
+/*    -moz-box-shadow:0 0 25px #111;*/
     max-width:940px;
 }
 #lightbox_content {
@@ -314,7 +314,7 @@ span {
 }
 
 #moreDetailsContent {
-    min-height: 600px;
+/*    min-height: 600px;*/
 }
 
 .detailsTitle{
