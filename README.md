@@ -8,17 +8,17 @@ SurroundSound is a PD-Net application that shows facebook events of a list of or
 
 ### websockets
 Edit
-	wsAddress
+	<wsAddress>
 in *app/SurroundSoundController.java* for setting the client-server communication websocket.
 
 ### Database
 Edit
-	db.default.url
+	<db.default.url>
 in *conf/application.conf* to set the SQL server.
 
 ### Organizers
 Edit
-	pageNamesArr
+	<pageNamesArr>
 in *app/SurroundSoundController.java* for managing organizers' facebook pages. Please note that the names have to correspond to the official id page name, use the id number direclty otherwise.
 
 E.g.:
