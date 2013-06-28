@@ -25,7 +25,7 @@ Edit `wsAddress` in `app/controllers/SurroundSoundController.java` for setting t
 Edit `db.default.url`
 in `conf/application.conf` to set the SQL server.
 ### Organizers
-Edit `pageNamesArr` in `app/controllers/SurroundSoundController.java` for managing organizers' facebook pages.
+Edit `pageNamesArr` in `app/controllers/SurroundSoundController.java` for managing the list of organizers' facebook pages.
 
 Note that the names have to correspond to the official id page name, use the id number direclty otherwise.
 
