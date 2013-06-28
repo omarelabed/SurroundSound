@@ -25,7 +25,7 @@ E.g.:
 *arteurbanalugano* is the id page name of https://www.facebook.com/arteurbanalugano,
 but *Living-Room* isn't the id page name of https://www.facebook.com/pages/Living-Room/52722248335: use *52722248335* instead.
 
-Tip: always check the *pageid* with **https://www.facebook.com/** *pageid*
+Tip: always check the *pageid* with https://www.facebook.com/*pageid*
 
 2. Run
 ------
