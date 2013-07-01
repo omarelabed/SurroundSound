@@ -156,12 +156,6 @@ public class SurroundSoundController extends Controller {
 			Sockets s = e.getValue();
 			ObjectNode msg = packFreshEvents();
 			msg.put("writtenBy", "pushToAllClients");
-//			msg.put("kind", "eventlist");
-//			msg.put("kind", "update");
-//			List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
-//			Collections.sort(all, new SurroundSoundFbEvent());
-//			JsonNode jall = Json.toJson(all);
-//			msg.put("events", jall);
 			s.wOut.write(msg);
 		}
 		lastPushToAllClients=Calendar.getInstance();
