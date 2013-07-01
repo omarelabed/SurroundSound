@@ -182,17 +182,9 @@ public class SurroundSoundController extends Controller {
 
 	}
 
-//	private static void resetUpdatesFlags() {
-//		pastUpdated=false;
-//		todayUpdated=false;
-//		soonUpdated=false;
-//	}
-
 	private static ObjectNode packFreshEvents() {
 		ObjectNode msg = Json.newObject();
 		msg.put("kind", "events");
-		List<SurroundSoundFbEvent> all = SurroundSoundFbEvent.all();
-		Collections.sort(all, new SurroundSoundFbEvent());
 		
 		Calendar filter = Calendar.getInstance();
 		int currentDay = filter.get(Calendar.DAY_OF_MONTH);
@@ -203,56 +195,22 @@ public class SurroundSoundController extends Controller {
 		List<SurroundSoundFbEvent> past = new ArrayList<SurroundSoundFbEvent>();
 		List<SurroundSoundFbEvent> today = new ArrayList<SurroundSoundFbEvent>();
 		List<SurroundSoundFbEvent> soon = new ArrayList<SurroundSoundFbEvent>();
-		if (pastUpdated){
+		
+//		if (pastUpdated){
 			past = SurroundSoundFbEvent.getByTimeTag("past");
-			pastUpdated=false;
-		} if (todayUpdated){
+			msg.put("past", Json.toJson(past));
+//			pastUpdated=false;
+//		} if (todayUpdated){
 			today = SurroundSoundFbEvent.getByTimeTag("today");
-			todayUpdated=false;
-		} if (soonUpdated){
+			msg.put("today", Json.toJson(today));
+//			todayUpdated=false;
+//		} if (soonUpdated){
 			soon = SurroundSoundFbEvent.getByTimeTag("soon");
-			soonUpdated=false;
-		}
-		msg.put("past", Json.toJson(past));
-		msg.put("today", Json.toJson(today));
-		msg.put("soon", Json.toJson(soon));
+			msg.put("soon", Json.toJson(soon));
+//			soonUpdated=false;
+//		}
 		
 		return msg;
-
-//		Date currentDate = new Date();
-
-//		while (allit.hasNext()){
-//			SurroundSoundFbEvent e = allit.next();
-//			String fl = e.timeFlag;
-//			switch (fl) {
-//			case "today": today.add(e);
-//			case "soon": soon.add(e);
-//			default: past.add(e);
-//			}
-			
-//			Calendar startTime = e.startTime;
-			
-//			int eDay = startTime.get(Calendar.DAY_OF_MONTH);
-//			int eMonth = startTime.get(Calendar.MONTH);
-//			int eYear = startTime.get(Calendar.YEAR);
-//			long timeInMillis = startTime.getTimeInMillis();
-//            Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
-//			startTime.setTimeInMillis(timeInMillis);
-//			Logger.info("\teDay = "+eDay+"; eMonth = "+eMonth+"; eYear = "+eYear+"; timeInMillis = "+timeInMillis);
-//			
-//			if (eYear<currentYear) past.add(e);
-//            else if ((eYear==currentYear)&&(eMonth<currentMonth)) past.add(e);
-//            else if ((eYear==currentYear)&&(eMonth==currentMonth)&&(eDay<currentDay)) past.add(e);
-//			else if ((currentDay==eDay)&&(currentMonth==eMonth)&&(currentYear==eYear)) today.add(e);
-//            else soon.add(e);
-//		}
-//		JsonNode jPast = Json.toJson(past);
-//		msg.put("past", jPast);
-//		JsonNode jToday = Json.toJson(today);
-//		msg.put("today", jToday);
-//		JsonNode jSoon = Json.toJson(soon);
-//		msg.put("soon", jSoon);
-//		return null;
 	}
 
 	private static boolean hasNewEvents() {
