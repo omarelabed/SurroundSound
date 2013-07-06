@@ -133,6 +133,7 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 	// Sets the timeFlag of this event
 	private void setTimeFlag() {
 		this.timeFlag = computeTimeFlag(this.startTime);
+		this.save();
 	}
 
 	// computes a timeFlag according to the given startTime
@@ -169,7 +170,8 @@ public class SurroundSoundFbEvent extends Model implements Comparator<SurroundSo
 		if (!samePlace) Logger.warn("SurroundSoundFbEvent.diff(): place has changed on event ["+oldEvent.id+"] "+oldEvent.name+" - !samePlace = "+!samePlace);
 		boolean sameName = newEvent.name.equals(oldEvent.name);
 		boolean sameUpdateTime = (oldEvent.updateTime==null)||(newEvent.updateTime.equals(oldEvent.updateTime));
-		return !sameCoverSource||!sameDate||!sameDescription||!samePlace||!sameName||!sameUpdateTime;
+		boolean sameTimeFlag = (oldEvent.timeFlag.equals(newEvent.timeFlag));
+		return !sameCoverSource||!sameDate||!sameDescription||!samePlace||!sameName||!sameUpdateTime||sameTimeFlag;
 	}
 	
 	public static List<SurroundSoundFbEvent> getByTimeTag(String flag){

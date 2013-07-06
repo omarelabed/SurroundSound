@@ -122,6 +122,7 @@ public class SurroundSoundController extends Controller {
 	}
 
 	public static void refresh(){
+		SurroundSoundFbEvent.refreshAllTimeFlags();
 		fetchEvents();
 		if (needsUpdate()){
 			pushToAllClients();
@@ -217,7 +218,7 @@ public class SurroundSoundController extends Controller {
 
 	public static void startEventsScheduler(){
 		Logger.info("eventsScheduler() ---- START SCHEDULER ---");
-		final ScheduledFuture<?> refreshHandler = scheduler.scheduleAtFixedRate(refresher, 5, 10, TimeUnit.MINUTES);
+		final ScheduledFuture<?> refreshHandler = scheduler.scheduleAtFixedRate(refresher, 1, 360, TimeUnit.SECONDS);
 	}
 
 	//should end with the application
