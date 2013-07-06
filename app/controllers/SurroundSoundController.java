@@ -80,6 +80,7 @@ public class SurroundSoundController extends Controller {
          "baroopslugano",
 //         "classcafelugano",
          "cluboneofficial",
+         "DVSAgency",
          "estivaljazz",
          "estivalugano",
          "foce.lugano",
